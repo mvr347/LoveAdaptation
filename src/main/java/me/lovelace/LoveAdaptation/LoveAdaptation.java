@@ -1,0 +1,74 @@
+package me.lovelace.LoveAdaptation;
+
+import me.lovelace.LoveAdaptation.commands.LoveAdaptationCommand;
+import me.lovelace.LoveAdaptation.database.DatabaseManager;
+import me.lovelace.LoveAdaptation.listeners.PlayerListener;
+import me.lovelace.LoveAdaptation.managers.PluginManager;
+import me.lovelace.LoveAdaptation.placeholders.LoveAdaptationExpansion;
+import me.lovelace.LoveAdaptation.tasks.AdaptationTask;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class LoveAdaptation extends JavaPlugin {
+
+    private DatabaseManager databaseManager;
+    private AdaptationTask adaptationTask;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+
+        // Initialize database manager
+        databaseManager = new DatabaseManager(this);
+        databaseManager.initialize();
+
+        // Initialize managers
+        PluginManager.getInstance().initialize(this);
+
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+
+        // Register commands
+        LoveAdaptationCommand command = new LoveAdaptationCommand(this);
+        if (getCommand("loveadaptation") != null) {
+            getCommand("loveadaptation").setExecutor(command);
+            getCommand("loveadaptation").setTabCompleter(command);
+        }
+
+        // Register PlaceholderAPI expansion if available
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new LoveAdaptationExpansion(this).register();
+            getLogger().info("Registered PlaceholderAPI expansion for LoveAdaptation");
+        }
+
+        // Load currently online players (for reload support)
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PluginManager.getInstance().getAdaptationManager().loadPlayer(player);
+        }
+
+        // Start periodic background tasks
+        adaptationTask = new AdaptationTask(this);
+        adaptationTask.runTaskTimer(this, 1L, 1L);
+
+        getLogger().info("LoveAdaptation v" + getDescription().getVersion() + " has been successfully enabled!");
+    }
+
+    @Override
+    public void onDisable() {
+        if (adaptationTask != null) {
+            adaptationTask.cancel();
+        }
+
+        // Save all player data synchronously before shutdown
+        if (PluginManager.getInstance().getAdaptationManager() != null) {
+            PluginManager.getInstance().getAdaptationManager().saveAllPlayersSync();
+        }
+
+        getLogger().info("LoveAdaptation has been disabled!");
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+}

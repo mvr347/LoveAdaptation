@@ -1,0 +1,160 @@
+menu_title: 'Адаптации персонажа'
+open_command: 'adaptation_menu'
+size: 54
+update_interval: 20
+
+items:
+  'glass_border':
+    material: GRAY_STAINED_GLASS_PANE
+    slots:
+      - 1-17
+      - 18
+      - 27
+      - 36
+      - 26
+      - 35
+      - 44
+      - 45-50
+      - 52
+    display_name: ' '
+    
+  'system_head':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTEyMjljMmM0ZWVhNzU1YWQxMmQ3YWVhMTg0ZjMyZTE5ZjcwOGIyMzFjYWVkNmFkNGVkZmZiNjdmZDJjNzBkZCJ9fX0=
+    slot: 0
+    display_name: '&6Система адаптаций'
+    lore:
+      - ''
+      - '&7Текущая: %loveadaptation_current_color%%loveadaptation_current_name%'
+      - '&7Прогресс: &f%loveadaptation_current_progress%'
+      - ''
+      - '&7Адаптируйся естественно'
+      - '&7К окружению вокруг тебя'
+
+  'tab_adaptations':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU2YTJmNjMxZTUwZTg1MzAwZTFjMjA3YTBjNjJiZDUxYjc5Nzc4OGQwMDkzMTIxY2VmNmQ1ZWNlYTI5ZTNkIn19fQ==
+    slot: 2
+    display_name: '&aАдаптации &7(вкл)'
+    lore:
+      - ''
+      - '&7ЛКМ - список адаптаций'
+
+  'tab_mutations':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDEyNjQ5NDk5YjkzNzU3YTA1YmExODVkMmZjMDAxMzAwYzJiNWI2MjVhMDcyNTkxYzI0YzhlYjQ0ZmY2ODkifX19
+    slot: 3
+    display_name: '&8Мутации &7(скоро)'
+    lore:
+      - ''
+      - '&c🔒 Скоро...'
+      - '&7Система мутаций в разработке'
+
+  'adaptation_water':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTFhMzZmMmVhZWExZjliN2UyNmFiNzQ5NTE2MzBiODRhNzA5MGE2NjBkMmU3NWQxNmRkNWMyMTlhZTE4ZThlYSJ9fX0=
+    slot: 19
+    display_name: '&bАдаптация: WATER'
+    lore:
+      - ''
+      - '&7Плавание в воде открывает'
+      - '&7способность дышать под водой'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_water_progress%%'
+      - '&7Шкала: %loveadaptation_water_bar%'
+      - '&7Статус: %loveadaptation_water_status%'
+      - ''
+      - '&eЛКМ - подробнее'
+
+  'adaptation_nether':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDI0ZjYyMjBlNWNmODFjNDRlODQ2YTVkZjUzZmFlYmVkNTU4NWRlYTEwMDFhNzk2NWRiZWUzZDhhN2Q2OWJhYyJ9fX0=
+    slot: 20
+    display_name: '&cАдаптация: NETHER'
+    lore:
+      - ''
+      - '&7Выживание в аду учит'
+      - '&7переносить высокие температуры'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_nether_progress%%'
+      - '&7Шкала: %loveadaptation_nether_bar%'
+      - '&7Статус: %loveadaptation_nether_status%'
+
+  'adaptation_cave':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTljYzc1YjU3ZjExZjZhMGZmOGYxMTZmYzNiOGEwZDk5YmJjOTU0YzU5MmFhZTgyNDc0ZTZkNDZlNmI5YWIwMSJ9fX0=
+    slot: 21
+    display_name: '&8Адаптация: CAVE'
+    lore:
+      - ''
+      - '&7Жизнь в пещерах обостряет'
+      - '&7ваши чувства в темноте'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_cave_progress%%'
+      - '&7Шкала: %loveadaptation_cave_bar%'
+      - '&7Статус: %loveadaptation_cave_status%'
+
+  'adaptation_height':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmZhZWViZmFjYmM3ZmEzNDQ0NzM4MDNmMWMxZmVhODczZjljMWMwOTUzMjJiNmRhYjg0MDdiYjc4NjI0MWQwYSJ9fX0=
+    slot: 22
+    display_name: '&fАдаптация: HEIGHT'
+    lore:
+      - ''
+      - '&7Постоянные прыжки и падения'
+      - '&7укрепляют ваши ноги'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_height_progress%%'
+      - '&7Шкала: %loveadaptation_height_bar%'
+      - '&7Статус: %loveadaptation_height_status%'
+      
+  'adaptation_end':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDRkYzgzNzZlOTgzZDMyZjM3ZjNlNmM2NTU1ZjhiZThmYWE2Y2I0OGUzYWRkYzZhYzFjYWU2MTU1ZGVlMjg3NyJ9fX0=
+    slot: 23
+    display_name: '&dАдаптация: END'
+    lore:
+      - ''
+      - '&7Сражение с пустотой делает'
+      - '&7вас менее уязвимым к магии'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_end_progress%%'
+      - '&7Шкала: %loveadaptation_end_bar%'
+      - '&7Статус: %loveadaptation_end_status%'
+
+  'adaptation_combat':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzZlOTRlMWUyMTlkNDZmZDdiY2Q0NTllNDRiZjQ3ZTZhNmVmYzMyNDFhZjRkMmYxOTIzMWIyZTE3ZmUxMWI5YiJ9fX0=
+    slot: 24
+    display_name: '&4Адаптация: COMBAT'
+    lore:
+      - ''
+      - '&7Получая урон в бою,'
+      - '&7ваша кожа становится крепче'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_combat_progress%%'
+      - '&7Шкала: %loveadaptation_combat_bar%'
+      - '&7Статус: %loveadaptation_combat_status%'
+
+  'adaptation_travel':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGVkYzMyOWI3MTcxZGUzZTZmNTI3ZjhiNTljNzNhMzg4ZWI4YjU5NWM5MzRkMWQ2YTg3MjFiYTNkMDI4ZmZmNSJ9fX0=
+    slot: 25
+    display_name: '&eАдаптация: TRAVELER'
+    lore:
+      - ''
+      - '&7Долгие путешествия делают'
+      - '&7вас выносливее'
+      - ''
+      - '&7Прогресс: &f%loveadaptation_travel_progress%%'
+      - '&7Шкала: %loveadaptation_travel_bar%'
+      - '&7Статус: %loveadaptation_travel_status%'
+
+  'info_btn':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0=
+    slot: 51
+    display_name: '&bИнформация'
+    lore:
+      - ''
+      - '&7Адаптации развиваются от вашей активности.'
+      - '&7Наберите 90% для разблокировки бонусов мастерства!'
+
+  'close_btn':
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ==
+    slot: 53
+    display_name: '&cЗакрыть'
+    lore:
+      - ''
+      - '&7ЛКМ - закрыть меню'
+    left_click_commands:
+      - '[close]'
