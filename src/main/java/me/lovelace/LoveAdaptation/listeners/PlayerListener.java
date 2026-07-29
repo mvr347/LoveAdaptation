@@ -16,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -224,10 +223,5 @@ public class PlayerListener implements Listener {
             int level = PluginManager.getInstance().getPotionManager().getPotionLevel(event.getItem());
             PluginManager.getInstance().getPotionManager().applyAdaptationPotion(event.getPlayer(), level);
         }
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        PluginManager.getInstance().getGuiManager().handleInventoryClick(event);
     }
 }
