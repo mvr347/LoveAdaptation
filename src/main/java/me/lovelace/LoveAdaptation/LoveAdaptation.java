@@ -8,7 +8,14 @@ import me.lovelace.LoveAdaptation.placeholders.LoveAdaptationExpansion;
 import me.lovelace.LoveAdaptation.tasks.AdaptationTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.logging.Level;
 
 public class LoveAdaptation extends JavaPlugin {
 
@@ -18,6 +25,7 @@ public class LoveAdaptation extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        deployDeluxeMenu();
 
         // Initialize database manager
         databaseManager = new DatabaseManager(this);
@@ -66,6 +74,46 @@ public class LoveAdaptation extends JavaPlugin {
         }
 
         getLogger().info("LoveAdaptation has been disabled!");
+    }
+
+    /**
+     * Меню адаптаций лежит в jar-е, а открывается через {@code dm open adaptation_menu}.
+     * DeluxeMenus читает меню только из своей папки gui_menus, поэтому файл нужно туда
+     * положить — иначе команда отвечает "Could not find menu: adaptation_menu".
+     * Существующий файл не трогаем: админ мог его отредактировать под себя.
+     */
+    private void deployDeluxeMenu() {
+        Plugin deluxeMenus = Bukkit.getPluginManager().getPlugin("DeluxeMenus");
+        if (deluxeMenus == null) {
+            getLogger().warning("DeluxeMenus не найден — меню адаптаций (/adaptations) работать не будет.");
+            return;
+        }
+
+        File menuFile = new File(deluxeMenus.getDataFolder(), "gui_menus/adaptation_menu.yml");
+        if (menuFile.exists()) {
+            return;
+        }
+
+        File parent = menuFile.getParentFile();
+        if (!parent.isDirectory() && !parent.mkdirs()) {
+            getLogger().warning("Не удалось создать папку " + parent.getPath() + " — меню адаптаций не установлено.");
+            return;
+        }
+
+        try (InputStream in = getResource("gui/adaptation_menu.yml")) {
+            if (in == null) {
+                getLogger().warning("Ресурс gui/adaptation_menu.yml отсутствует в jar — меню адаптаций не установлено.");
+                return;
+            }
+            Files.copy(in, menuFile.toPath());
+        } catch (IOException e) {
+            getLogger().log(Level.WARNING, "Не удалось скопировать меню адаптаций в DeluxeMenus", e);
+            return;
+        }
+
+        // Без перезагрузки DeluxeMenus подхватит меню только со следующего запуска сервера.
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm reload");
+        getLogger().info("Меню адаптаций установлено в DeluxeMenus (gui_menus/adaptation_menu.yml).");
     }
 
     public DatabaseManager getDatabaseManager() {

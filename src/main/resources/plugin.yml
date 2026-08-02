@@ -4,7 +4,7 @@ main: me.lovelace.LoveAdaptation.LoveAdaptation
 api-version: '1.21'
 author: Lovelace
 description: Dynamic environment adaptation plugin for Minecraft.
-softdepend: [PlaceholderAPI, LoveCore, LoveClans, LoveBehavior]
+softdepend: [PlaceholderAPI, DeluxeMenus, LoveCore, LoveClans, LoveBehavior]
 
 commands:
   loveadaptation:

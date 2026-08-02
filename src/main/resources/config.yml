@@ -270,6 +270,7 @@ lang:
   prefix: "&8[&6LoveAdaptation&8] "
   no_permission: "&cУ вас нет прав для выполнения этой команды."
   only_players: "&cЭта команда доступна только игрокам."
+  no_deluxemenus: "&cМеню недоступно: не установлен DeluxeMenus."
   reloaded: "&aКонфигурация и база данных успешно перезагружены!"
   player_not_found: "&cИгрок %player% не найден."
   reset_success: "&aВсе адаптации игрока %player% сброшены."

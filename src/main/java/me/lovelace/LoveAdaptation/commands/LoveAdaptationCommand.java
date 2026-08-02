@@ -41,6 +41,11 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
+            if (Bukkit.getPluginManager().getPlugin("DeluxeMenus") == null) {
+                player.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_deluxemenus",
+                        "&cМеню недоступно: не установлен DeluxeMenus.")));
+                return true;
+            }
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open adaptation_menu " + player.getName());
             return true;
         }
