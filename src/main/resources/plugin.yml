@@ -9,8 +9,13 @@ softdepend: [PlaceholderAPI, DeluxeMenus, LoveCore, LoveClans, LoveBehavior]
 commands:
   loveadaptation:
     description: Main command for LoveAdaptation plugin
-    aliases: [la, adaptation, adaptations]
+    aliases: [ la, adaptation, adaptations, адаптация ]
     permission: loveadaptation.use
+  loveadaptationadmin:
+    description: Admin command for LoveAdaptation plugin
+    aliases: [ laadmin, лаадмин ]
+    usage: /loveadaptationadmin <reload|reset|check|givepotion>
+    permission: loveadaptation.admin
 
 permissions:
   loveadaptation.use:
