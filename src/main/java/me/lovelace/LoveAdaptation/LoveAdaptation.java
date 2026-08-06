@@ -1,5 +1,6 @@
 package me.lovelace.LoveAdaptation;
 
+import me.lovelace.LoveAdaptation.commands.LoveAdaptationAdminCommand;
 import me.lovelace.LoveAdaptation.commands.LoveAdaptationCommand;
 import me.lovelace.LoveAdaptation.database.DatabaseManager;
 import me.lovelace.LoveAdaptation.listeners.PlayerListener;
@@ -42,6 +43,12 @@ public class LoveAdaptation extends JavaPlugin {
         if (getCommand("loveadaptation") != null) {
             getCommand("loveadaptation").setExecutor(command);
             getCommand("loveadaptation").setTabCompleter(command);
+        }
+
+        LoveAdaptationAdminCommand adminCommand = new LoveAdaptationAdminCommand(this);
+        if (getCommand("loveadaptationadmin") != null) {
+            getCommand("loveadaptationadmin").setExecutor(adminCommand);
+            getCommand("loveadaptationadmin").setTabCompleter(adminCommand);
         }
 
         // Register PlaceholderAPI expansion if available

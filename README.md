@@ -10,16 +10,25 @@ LoveAdaptation отслеживает, сколько игрок проводи�
 
 | Команда | Алиасы | Описание | Пермишин |
 |---|---|---|---|
-| `/loveadaptation` | `la`, `adaptation`, `adaptations` | Открыть меню адаптаций и просмотреть прогресс | `loveadaptation.use` |
-| `/loveadaptationadmin` | `laadmin` | Администраторские команды | `loveadaptation.admin` |
+| `/loveadaptation` | `la`, `adaptation`, `adaptations`, `адаптация` | Открыть меню адаптаций, посмотреть прогресс (`info`) | `loveadaptation.use` |
+| `/loveadaptationadmin` | `laadmin`, `лаадмин` | Администраторские команды | `loveadaptation.admin` |
+
+### Подкоманды `/loveadaptation`
+
+- `menu` (или без аргументов) — открыть меню адаптаций
+- `info [player]` — показать прогресс адаптаций (свой или указанного игрока)
+- `help` — показать список команд
 
 ### Подкоманды `/loveadaptationadmin`
 
 - `reload` — перезагрузить config.yml
 - `reset <player>` — сбросить прогресс адаптаций игрока
-- `check <player>` — показать детальный прогресс адаптаций
-- `grant <player> <adaptationId>` — немедленно разблокировать адаптацию
-- `revoke <player> <adaptationId>` — отобрать адаптацию
+- `check <adaptationId> [player]` — показать детальный прогресс конкретной адаптации
+- `givepotion <player> <1|2>` — выдать зелье адаптации указанного уровня
+
+Старые пути `/loveadaptation reset|check|givepotion|reload` больше не выполняют действие — они
+перенаправляют администратора короткой подсказкой на `/loveadaptationadmin`, чтобы команда,
+набранная по привычке, не пропадала молча.
 
 ## Пермишины
 

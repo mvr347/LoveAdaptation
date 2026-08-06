@@ -4,6 +4,7 @@ import me.lovelace.LoveAdaptation.LoveAdaptation;
 import me.lovelace.LoveAdaptation.models.AdaptationData;
 import me.lovelace.LoveAdaptation.models.AdaptationType;
 import me.lovelace.LoveAdaptation.models.PlayerData;
+import me.lovelace.LoveAdaptation.textures.HeadTextures;
 import me.lovelace.LoveAdaptation.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -345,8 +346,8 @@ public class AdaptationManager {
 
     public String getHeadTexture(AdaptationType type) {
         if (type == AdaptationType.BASE) {
-            return plugin.getConfig().getString("base_adaptation.head_texture", "");
+            return plugin.getConfig().getString("base_adaptation.head_texture", HeadTextures.BASE);
         }
-        return plugin.getConfig().getString("adaptations." + type.getConfigKey() + ".head_texture", "");
+        return plugin.getConfig().getString("adaptations." + type.getConfigKey() + ".head_texture", HeadTextures.forType(type));
     }
 }
