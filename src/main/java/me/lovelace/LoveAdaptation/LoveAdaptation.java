@@ -10,6 +10,7 @@ import me.lovelace.LoveAdaptation.tasks.AdaptationTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -71,6 +72,7 @@ public class LoveAdaptation extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        HandlerList.unregisterAll(this);
         if (adaptationTask != null) {
             adaptationTask.cancel();
         }
