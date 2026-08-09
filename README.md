@@ -70,16 +70,18 @@ adaptations:
       - type: "SPEED"
         level: 2                    # уровень эффекта (1-5)
         apply_in: ["WATER"]        # где применяется (WATER, NETHER, CAVE, OVERWORLD, etc.)
-      - type: "CONDUIT_POWER"
-        level: 1
-        apply_in: ["WATER"]
     
-    # Бонусные эффекты (при 90%+ прогресса)
+    # Бонусные эффекты (при 90%+ прогресса). CONDUIT_POWER (иммунитет к утоплению)
+    # намеренно вынесен сюда, а не в effects_base — иначе игрок мог бы висеть в
+    # воде AFK бесконечно сразу после разблокировки адаптации.
     effects_bonus:
       - type: "SPEED"
         level: 3                    # усиленная скорость при бонусе
         apply_in: ["WATER"]
       - type: "DOLPHINS_GRACE"
+        level: 1
+        apply_in: ["WATER"]
+      - type: "CONDUIT_POWER"
         level: 1
         apply_in: ["WATER"]
     

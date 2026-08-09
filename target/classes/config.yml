@@ -34,14 +34,17 @@ adaptations:
       - type: "SPEED"
         level: 2
         apply_in: ["WATER"]
-      - type: "CONDUIT_POWER"
-        level: 1
-        apply_in: ["WATER"]
+    # CONDUIT_POWER не даётся сразу при разблокировке (100% неуязвимость к утоплению
+    # с 15 часов делала возможным бесконечно висеть в воде AFK) — теперь это награда
+    # только за 90%+ мастерства.
     effects_bonus:
       - type: "SPEED"
         level: 3
         apply_in: ["WATER"]
       - type: "DOLPHINS_GRACE"
+        level: 1
+        apply_in: ["WATER"]
+      - type: "CONDUIT_POWER"
         level: 1
         apply_in: ["WATER"]
     hunger_modifier_base: 1.0
@@ -144,8 +147,10 @@ adaptations:
     name: "Боевой закал"
     description: "Ускоренная регенерация после урона"
     color: "&4"
-    unlock_damage: 100.0
-    required_damage: 100.0
+    # 100 было слишком мало — набиралось за пару минут под ударами нескольких зомби,
+    # тогда как другие адаптации требуют часы игры. Подняли до сопоставимого объёма.
+    unlock_damage: 5000.0
+    required_damage: 5000.0
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmE2ZDM2NjBiN2QxYmMzYTgyM2E4MTJhNjYwZDRmZGMzY2M5NzkxOTNjNDNlNmI5YWIyY2I3YzgxYjdmNzEifX19"
@@ -276,3 +281,15 @@ lang:
   check_header: "&6=== Прогресс адаптаций %player% ==="
   check_item: "&7%adaptation_name%: &f%progress%% &7(%status%)"
   potion_applied: "&eВы выпили %potion_name%! Все адаптации активны на %duration% сек."
+  admin_moved: "&eЭта команда перемещена. Используйте: &f%command%"
+  help_header: "&8========== &6LoveAdaptation Помощь &8=========="
+  help_menu: "&6/adaptation menu &7- Открыть меню адаптаций и посмотреть прогресс"
+  help_info: "&6/adaptation info [игрок] &7- Показать прогресс адаптаций"
+  help_admin: "&6/loveadaptationadmin &7- Административные команды LoveAdaptation"
+  help_footer: "&8=========================================="
+  admin_help_header: "&8========== &6LoveAdaptation Admin &8=========="
+  admin_help_reload: "&6/loveadaptationadmin reload &7- Перезагрузить конфигурацию"
+  admin_help_reset: "&6/loveadaptationadmin reset <игрок> &7- Сбросить прогресс адаптаций игрока"
+  admin_help_check: "&6/loveadaptationadmin check <адаптация> [игрок] &7- Показать детальный прогресс адаптации"
+  admin_help_givepotion: "&6/loveadaptationadmin givepotion <игрок> <1|2> &7- Выдать зелье адаптации"
+  admin_help_footer: "&8=========================================="

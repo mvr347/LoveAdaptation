@@ -34,14 +34,17 @@ adaptations:
       - type: "SPEED"
         level: 2
         apply_in: ["WATER"]
-      - type: "CONDUIT_POWER"
-        level: 1
-        apply_in: ["WATER"]
+    # CONDUIT_POWER не даётся сразу при разблокировке (100% неуязвимость к утоплению
+    # с 15 часов делала возможным бесконечно висеть в воде AFK) — теперь это награда
+    # только за 90%+ мастерства.
     effects_bonus:
       - type: "SPEED"
         level: 3
         apply_in: ["WATER"]
       - type: "DOLPHINS_GRACE"
+        level: 1
+        apply_in: ["WATER"]
+      - type: "CONDUIT_POWER"
         level: 1
         apply_in: ["WATER"]
     hunger_modifier_base: 1.0
@@ -144,8 +147,10 @@ adaptations:
     name: "Боевой закал"
     description: "Ускоренная регенерация после урона"
     color: "&4"
-    unlock_damage: 100.0
-    required_damage: 100.0
+    # 100 было слишком мало — набиралось за пару минут под ударами нескольких зомби,
+    # тогда как другие адаптации требуют часы игры. Подняли до сопоставимого объёма.
+    unlock_damage: 5000.0
+    required_damage: 5000.0
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmE2ZDM2NjBiN2QxYmMzYTgyM2E4MTJhNjYwZDRmZGMzY2M5NzkxOTNjNDNlNmI5YWIyY2I3YzgxYjdmNzEifX19"
@@ -270,7 +275,6 @@ lang:
   prefix: "&8[&6LoveAdaptation&8] "
   no_permission: "&cУ вас нет прав для выполнения этой команды."
   only_players: "&cЭта команда доступна только игрокам."
-  no_deluxemenus: "&cМеню недоступно: не установлен DeluxeMenus."
   reloaded: "&aКонфигурация и база данных успешно перезагружены!"
   player_not_found: "&cИгрок %player% не найден."
   reset_success: "&aВсе адаптации игрока %player% сброшены."
