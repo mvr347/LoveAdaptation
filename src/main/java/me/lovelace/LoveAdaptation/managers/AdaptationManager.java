@@ -344,6 +344,13 @@ public class AdaptationManager {
         return plugin.getConfig().getString("adaptations." + type.getConfigKey() + ".color", "&f");
     }
 
+    public String getAdaptationDescription(AdaptationType type) {
+        if (type == AdaptationType.BASE) {
+            return "";
+        }
+        return plugin.getConfig().getString("adaptations." + type.getConfigKey() + ".description", "");
+    }
+
     public String getHeadTexture(AdaptationType type) {
         if (type == AdaptationType.BASE) {
             return plugin.getConfig().getString("base_adaptation.head_texture", HeadTextures.BASE);

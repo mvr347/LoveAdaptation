@@ -13,9 +13,9 @@ import me.lovelace.LoveAdaptation.models.AdaptationType;
  * для каждой адаптации) — это не хардкод вместо конфигурации, а единая точка правды для
  * дефолтных значений, вместо того чтобы дублировать одни и те же base64-строки по коду.
  * <p>
- * Меню {@code gui/adaptation_menu.yml} сюда не перенесено: это файл DeluxeMenus — стороннего
- * плагина, который читает обычный YAML и не может ссылаться на константы Java-класса, поэтому
- * его литералы неизбежно остаются инлайн в самом YAML.
+ * Иконки служебных кнопок нативного GUI (info/close) читаются из heads.yml через
+ * {@link me.lovelace.LoveAdaptation.config.HeadsConfig} — {@code BASE_INFO_FALLBACK} и
+ * {@code BASE_CLOSE_FALLBACK} ниже служат тем же резервным вариантом на случай отсутствия ключа.
  */
 public final class HeadTextures {
 
@@ -70,6 +70,18 @@ public final class HeadTextures {
      */
     public static final String TRAVEL =
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU2YTJmNjMxZTUwZTg1MzAwZTFjMjA3YTBjNjJiZDUxYjc5Nzc4OGQwMDkzMTIxY2VmNmQ1ZWNlYTI5ZTNkIn19fQ==";
+
+    /**
+     * Текстура кнопки "Информация" нативного GUI (резерв на случай отсутствия ключа {@code info} в heads.yml).
+     */
+    public static final String BASE_INFO_FALLBACK =
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0=";
+
+    /**
+     * Текстура кнопки "Закрыть" нативного GUI (резерв на случай отсутствия ключа {@code close} в heads.yml).
+     */
+    public static final String BASE_CLOSE_FALLBACK =
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWZkMjQwMDAwMmFkOWZiYmJkMDA2Njk0MWViNWIxYTM4NGFiOWIwZTQ4YTE3OGVlOTZlNGQxMjlhNTIwODY1NCJ9fX0=";
 
     /**
      * Возвращает резервную текстуру головы для указанного типа адаптации.
