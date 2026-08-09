@@ -1,7 +1,7 @@
 name: LoveAdaptation
 version: 1.0.0
 main: me.lovelace.LoveAdaptation.LoveAdaptation
-api-version: '1.21'
+api-version: '26.2'
 author: Lovelace
 description: Dynamic environment adaptation plugin for Minecraft.
 softdepend: [PlaceholderAPI, LoveCore, LoveClans, LoveBehavior]
@@ -9,8 +9,13 @@ softdepend: [PlaceholderAPI, LoveCore, LoveClans, LoveBehavior]
 commands:
   loveadaptation:
     description: Main command for LoveAdaptation plugin
-    aliases: [la, adaptation, adaptations]
+    aliases: [ la, adaptation, adaptations, адаптация ]
     permission: loveadaptation.use
+  loveadaptationadmin:
+    description: Admin command for LoveAdaptation plugin
+    aliases: [ laadmin, лаадмин ]
+    usage: /loveadaptationadmin <reload|reset|check|givepotion>
+    permission: loveadaptation.admin
 
 permissions:
   loveadaptation.use:

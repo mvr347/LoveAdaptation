@@ -1,0 +1,6 @@
+# Base64-текстуры служебных иконок GUI-меню адаптаций (кнопки "Информация" и
+# "Закрыть"). Текстуры самих адаптаций (голова для каждой стихии) задаются
+# отдельно — см. adaptations.<type>.head_texture и base_adaptation.head_texture
+# в config.yml, каждая уникальна для своей адаптации.
+info: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0="
+close: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWZkMjQwMDAwMmFkOWZiYmJkMDA2Njk0MWViNWIxYTM4NGFiOWIwZTQ4YTE3OGVlOTZlNGQxMjlhNTIwODY1NCJ9fX0="
