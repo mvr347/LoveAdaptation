@@ -35,10 +35,12 @@ public final class AdaptationMenu {
     public static final int INFO_SLOT = 51;
     public static final int CLOSE_SLOT = 53;
 
+    // Боковые стенки рабочей зоны (18, 26, 27, 35, 36, 44) сюда не входят - по
+    // gui-gen-5 (RULE 6) рабочая зона никогда не заполняется стеклом, только
+    // контентом или пустотой, даже по бокам.
     private static final int[] BORDER_SLOTS = {
         1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
-        18, 26, 27, 35, 36, 44,
         45, 46, 47, 48, 49, 50, 52
     };
 
