@@ -56,8 +56,12 @@ public class Utils {
 
     public static void sendActionBar(Player player, String message) {
         if (player != null && message != null && !message.isEmpty()) {
-            var plugin = me.lovelace.LoveAdaptation.managers.PluginManager.getInstance().getPlugin();
-            if (!me.lovelace.LoveAdaptation.integration.LoveNotifyBridge.isChannelEnabled(plugin, player.getUniqueId(), "ACTION_BAR")) {
+            // Не кэшируем Optional<LoveNotify> — сосед может зарегистрировать реализацию
+            // позже, см. LoveCore.service(...) javadoc в LoveCore.
+            boolean allowed = dev.lovelace.lovecore.api.LoveCore.service(dev.lovelace.lovecore.api.notify.LoveNotify.class)
+                    .map(n -> n.isChannelEnabled(player.getUniqueId(), dev.lovelace.lovecore.api.notify.LoveNotify.Channel.ACTION_BAR))
+                    .orElse(true);
+            if (!allowed) {
                 return;
             }
             try {
