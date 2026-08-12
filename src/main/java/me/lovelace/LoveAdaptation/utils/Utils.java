@@ -56,6 +56,10 @@ public class Utils {
 
     public static void sendActionBar(Player player, String message) {
         if (player != null && message != null && !message.isEmpty()) {
+            var plugin = me.lovelace.LoveAdaptation.managers.PluginManager.getInstance().getPlugin();
+            if (!me.lovelace.LoveAdaptation.integration.LoveNotifyBridge.isChannelEnabled(plugin, player.getUniqueId(), "ACTION_BAR")) {
+                return;
+            }
             try {
                 player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, net.md_5.bungee.api.chat.TextComponent.fromLegacyText(color(message)));
             } catch (Throwable t) {
