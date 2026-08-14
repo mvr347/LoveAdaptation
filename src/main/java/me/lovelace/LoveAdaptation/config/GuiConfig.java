@@ -37,8 +37,9 @@ public final class GuiConfig {
                         new InputStreamReader(defStream, StandardCharsets.UTF_8));
                 gui.setDefaults(defConfig);
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
             // используем то, что уже загружено
+            plugin.getLogger().warning("Failed to load default gui.yml from plugin jar: " + e.getMessage());
         }
     }
 

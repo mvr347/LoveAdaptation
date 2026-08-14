@@ -7,6 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 
@@ -16,12 +17,21 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+
+    private static Logger logger() {
+        try {
+            return JavaPlugin.getProvidingPlugin(Utils.class).getLogger();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return Logger.getLogger(Utils.class.getName());
+        }
+    }
 
     public static String color(String text) {
         if (text == null) return "";
@@ -78,7 +88,7 @@ public class Utils {
             Sound sound = Sound.valueOf(soundName.toUpperCase());
             player.playSound(player.getLocation(), sound, volume, pitch);
         } catch (IllegalArgumentException e) {
-            // Sound not found, fallback silently
+            logger().warning("Unknown sound name in config: '" + soundName + "' (" + e.getMessage() + ")");
         }
     }
 
@@ -121,7 +131,7 @@ public class Utils {
                 meta.setOwnerProfile(profile);
             }
         } catch (Exception e) {
-            // Texture parsing fallback
+            logger().warning("Failed to apply head texture '" + texture + "': " + e.getMessage());
         }
     }
 
@@ -137,7 +147,8 @@ public class Utils {
                     return json.substring(start, end);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger().warning("Failed to decode base64 head texture: " + e.getMessage());
         }
         return null;
     }

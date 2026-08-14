@@ -150,10 +150,16 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
             return;
         }
 
-        int level = 1;
+        int level;
         try {
             level = Integer.parseInt(args[2]);
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException e) {
+            sender.sendMessage(Utils.color(prefix + "&cУровень должен быть числом 1 или 2."));
+            return;
+        }
+        if (level != 1 && level != 2) {
+            sender.sendMessage(Utils.color(prefix + "&cИспользование: /loveadaptationadmin givepotion <player> <1|2>"));
+            return;
         }
 
         ItemStack potion = PluginManager.getInstance().getPotionManager().createAdaptationPotion(level);

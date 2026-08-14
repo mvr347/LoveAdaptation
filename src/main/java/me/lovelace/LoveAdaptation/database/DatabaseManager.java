@@ -41,7 +41,17 @@ public class DatabaseManager {
     }
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(connectionUrl);
+        Connection conn = DriverManager.getConnection(connectionUrl);
+        // Multiple async tasks (periodic auto-save, per-player quit save, history logging) can
+        // each open their own connection concurrently; SQLite only allows one writer at a time,
+        // so without a busy timeout a second writer fails immediately with SQLITE_BUSY instead
+        // of waiting briefly for the lock to clear.
+        try (Statement pragmaStmt = conn.createStatement()) {
+            pragmaStmt.execute("PRAGMA busy_timeout = 5000;");
+        } catch (SQLException e) {
+            plugin.getLogger().warning("Failed to set busy_timeout on database connection: " + e.getMessage());
+        }
+        return conn;
     }
 
     private void createTables() {
@@ -177,7 +187,9 @@ public class DatabaseManager {
 
     public void savePlayerDataSync(PlayerData data) {
         long now = System.currentTimeMillis();
-        try (Connection conn = getConnection()) {
+        Connection conn = null;
+        try {
+            conn = getConnection();
             conn.setAutoCommit(false);
 
             // Update player_adaptations
@@ -258,6 +270,21 @@ public class DatabaseManager {
             conn.commit();
         } catch (SQLException e) {
             plugin.getLogger().severe("Failed to save player data for " + data.getUuid() + ": " + e.getMessage());
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    plugin.getLogger().severe("Failed to roll back transaction for " + data.getUuid() + ": " + rollbackEx.getMessage());
+                }
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    plugin.getLogger().warning("Failed to close database connection for " + data.getUuid() + ": " + closeEx.getMessage());
+                }
+            }
         }
     }
 
