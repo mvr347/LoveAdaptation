@@ -46,6 +46,8 @@ public final class HeadsConfig {
             }
             return YamlConfiguration.loadConfiguration(file);
         } catch (IllegalArgumentException | IllegalStateException exception) {
+            java.util.logging.Logger.getLogger(HeadsConfig.class.getName())
+                    .warning("Failed to load heads.yml: " + exception.getMessage());
             return null;
         }
     }

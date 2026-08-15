@@ -33,10 +33,23 @@ public class AdaptationManager {
     }
 
     public void loadPlayer(Player player) {
-        plugin.getDatabaseManager().loadPlayerData(player.getUniqueId()).thenAccept(data -> {
-            data.setLastLocation(player.getLocation().clone());
-            playerDataMap.put(player.getUniqueId(), data);
-            evaluateActiveAdaptation(player, data);
+        UUID uuid = player.getUniqueId();
+        plugin.getDatabaseManager().loadPlayerData(uuid).thenAccept(data -> {
+            // loadPlayerData() completes on an async DB thread (CompletableFuture.supplyAsync),
+            // so thenAccept runs there too. Hop back to the main thread before touching any
+            // Bukkit API (player.getLocation(), sendTitle/sound calls inside
+            // evaluateActiveAdaptation, etc.) - calling those off-thread is unsafe.
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Player online = Bukkit.getPlayer(uuid);
+                if (online == null || !online.isOnline()) {
+                    // Player disconnected while their data was still loading; discard instead
+                    // of publishing a playerDataMap entry that would never be saved or removed.
+                    return;
+                }
+                data.setLastLocation(online.getLocation().clone());
+                playerDataMap.put(uuid, data);
+                evaluateActiveAdaptation(online, data);
+            });
         });
     }
 

@@ -33,6 +33,9 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         PluginManager.getInstance().getAdaptationManager().unloadPlayer(event.getPlayer());
+        // Prevent travelAccumulator from growing forever with an entry per player who has
+        // ever moved on this server - it is never read again once the player is offline.
+        travelAccumulator.remove(event.getPlayer().getUniqueId());
     }
 
     private final java.util.Map<java.util.UUID, Double> travelAccumulator = new java.util.concurrent.ConcurrentHashMap<>();
