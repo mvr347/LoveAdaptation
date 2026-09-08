@@ -121,8 +121,8 @@ adaptations:
 
   end:
     enabled: true
-    name: "Скиталец Эндера"
-    description: "Плавное падение в Энде"
+    name: "Повелитель Края"
+    description: "Скорость, защита в Энде, безвредный жемчуг и иммунитет к левитации"
     color: "&5"
     unlock_hours: 8
     required_ticks: 576000  # 8 hours in The End
@@ -131,16 +131,25 @@ adaptations:
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I5ODNlY2VhNTJlM2Y3ODNlNWYxY2Y2YWVkNWI0Yjc2NWVkZjhiNzc0ZDNlNTExM2EzNTAzYWIxYjY5YmEyIn19fQ=="
     degradation_rate_percent_per_hour: 5.0
     effects_base:
-      - type: "SLOW_FALLING"
+      - type: "SPEED"
+        level: 1
+        apply_in: ["THE_END"]
+      - type: "RESISTANCE"
         level: 1
         apply_in: ["THE_END"]
     effects_bonus:
-      - type: "SLOW_FALLING"
+      - type: "SPEED"
         level: 2
         apply_in: ["THE_END"]
-      - type: "JUMP_BOOST"
+      - type: "RESISTANCE"
+        level: 2
+        apply_in: ["THE_END"]
+      - type: "REGENERATION"
         level: 1
         apply_in: ["THE_END"]
+    ender_pearl_damage_reduction_base: 0.5
+    ender_pearl_damage_reduction_bonus: 1.0  # 100% immunity to Ender Pearl fall damage at 90%+
+    shulker_levitation_immunity: true
 
   combat:
     enabled: true
@@ -265,6 +274,77 @@ notifications:
     sound_volume: 0.5
     sound_pitch: 0.5
 
+bestiary:
+  enabled: true
+  anti_abuse:
+    enabled: true
+    farm_mob_progress_chance: 0.01
+    farm_mob_damage_bonus: 0.01
+  book:
+    title: "Полевой Бестиарий"
+    author_default: "Исследователь"
+    display_name: "&6Полевой Бестиарий"
+    lore:
+      - "&7Физический журнал исследований."
+      - "&7Заполняется во время живой охоты."
+      - " "
+      - "&e[ПКМ] &7- Открыть страницы бестиария."
+      - "&8Бонусы активны, пока книга в инвентаре."
+  ui:
+    title_page_header: "ПОЛЕВОЙ БЕСТИАРИЙ"
+    title_page_author_label: "Автор: "
+    title_page_subtitle: "Журнал полевых заметок"
+    separator: "───────────────"
+    empty_page_title: "СТРАНИЦЫ ПУСТЫ"
+    empty_page_lines:
+      - "Вы пока не исследовали ни одного монстра."
+      - ""
+      - "Держите этот журнал при себе во время охоты."
+      - ""
+      - "Каждый поверженный вид откроет новую страницу с повадками и бонусами урона."
+    record_badge: "Запись %number%"
+    stage_headers:
+      stage_1: "Полевая запись (I):"
+      stage_2: "Полевые наброски (II):"
+      stage_3: "Повадки и среда (III):"
+      stage_4: "Анатомический анализ (IV):"
+  tiers:
+    none:
+      required_kills: 0
+      bonus_damage: 0.00
+      resistance: 0.00
+      display_name: "Запись 0 (Без баффов)"
+      short_badge: "Запись 0"
+      roman: "0"
+    tier_1:
+      required_kills: 50
+      bonus_damage: 0.03
+      resistance: 0.00
+      display_name: "⭐ Запись 1"
+      short_badge: "Запись 1"
+      roman: "1"
+    tier_2:
+      required_kills: 200
+      bonus_damage: 0.07
+      resistance: 0.05
+      display_name: "⭐⭐ Запись 2"
+      short_badge: "Запись 2"
+      roman: "2"
+    tier_3:
+      required_kills: 500
+      bonus_damage: 0.12
+      resistance: 0.10
+      display_name: "👑 Запись 3"
+      short_badge: "Запись 3"
+      roman: "3"
+  messages:
+    new_mob_discovered: "&6[Бестиарий] &aВ журнал добавлена новая запись: &f«&e%mob_name%&f»&7!"
+    family_discovered: "&6[Бестиарий] &eНовое родство! &7Анатомия &f«&e%mob_name%&f» &7указывает на связь с &6%family_name%&7!"
+    stage_2_unlocked: "&6[Бестиарий] &7Собраны полевые наброски о &f«&e%mob_name%&f» &a(5 убийств)&7!"
+    stage_3_unlocked: "&6[Бестиарий] &7Изучены повадки и адаптация &f«&e%mob_name%&f» &a(20 убийств)&7!"
+    stage_4_unlocked: "&6[Бестиарий] &7Анатомический анализ &f«&e%mob_name%&f» &aзавершен (50 убийств, шкала HP)&7!"
+    actionbar_hp: "&c[%mob_name%] &fHP: &e%current_hp%&7/&c%max_hp%"
+
 gui:
   title: "&6Адаптации персонажа"
   size: 54
@@ -292,4 +372,7 @@ lang:
   admin_help_reset: "&6/loveadaptationadmin reset <игрок> &7- Сбросить прогресс адаптаций игрока"
   admin_help_check: "&6/loveadaptationadmin check <адаптация> [игрок] &7- Показать детальный прогресс адаптации"
   admin_help_givepotion: "&6/loveadaptationadmin givepotion <игрок> <1|2> &7- Выдать зелье адаптации"
+  admin_help_givebestiary: "&6/loveadaptationadmin givebestiary <игрок> &7- Выдать книгу Полевого Бестиария"
   admin_help_footer: "&8=========================================="
+
+

@@ -39,6 +39,7 @@ public class LoveAdaptation extends JavaPlugin {
         // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new AdaptationMenuListener(), this);
+        getServer().getPluginManager().registerEvents(new me.lovelace.LoveAdaptation.bestiary.BestiaryListener(this, PluginManager.getInstance().getBestiaryManager()), this);
 
         // Register commands
         LoveAdaptationCommand command = new LoveAdaptationCommand(this);
@@ -51,6 +52,12 @@ public class LoveAdaptation extends JavaPlugin {
         if (getCommand("loveadaptationadmin") != null) {
             getCommand("loveadaptationadmin").setExecutor(adminCommand);
             getCommand("loveadaptationadmin").setTabCompleter(adminCommand);
+        }
+
+        me.lovelace.LoveAdaptation.commands.BestiaryCommand bestiaryCommand = new me.lovelace.LoveAdaptation.commands.BestiaryCommand(this);
+        if (getCommand("bestiary") != null) {
+            getCommand("bestiary").setExecutor(bestiaryCommand);
+            getCommand("bestiary").setTabCompleter(bestiaryCommand);
         }
 
         // Register PlaceholderAPI expansion if available

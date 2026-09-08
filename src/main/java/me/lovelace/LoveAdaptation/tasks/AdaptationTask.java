@@ -20,7 +20,8 @@ public class AdaptationTask extends BukkitRunnable {
     public void run() {
         tickCounter++;
 
-        long degradationCheckIntervalTicks = plugin.getConfig().getLong("degradation_system.check_interval_seconds", 60) * 20L;
+        long checkSeconds = plugin.getConfig().getLong("degradation_system.check_interval_seconds", 60);
+        long degradationCheckIntervalTicks = Math.max(20L, checkSeconds * 20L);
         long saveIntervalTicks = 300 * 20L; // 5 minutes
 
         for (Player player : Bukkit.getOnlinePlayers()) {

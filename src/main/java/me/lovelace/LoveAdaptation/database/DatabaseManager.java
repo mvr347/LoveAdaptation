@@ -23,9 +23,12 @@ public class DatabaseManager {
     }
 
     public void initialize() {
-        String path = plugin.getConfig().getString("database.file", "plugins/LoveAdaptation/data.db");
-        dbFile = new File(plugin.getDataFolder().getParentFile().getParentFile(), path);
-        if (!dbFile.getParentFile().exists()) {
+        String path = plugin.getConfig().getString("database.file", "data.db");
+        if (path.startsWith("plugins/LoveAdaptation/") || path.startsWith("plugins\\LoveAdaptation\\")) {
+            path = path.substring("plugins/LoveAdaptation/".length());
+        }
+        dbFile = new File(plugin.getDataFolder(), path);
+        if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
             dbFile.getParentFile().mkdirs();
         }
 

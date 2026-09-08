@@ -82,10 +82,18 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void playSound(Player player, String soundName, float volume, float pitch) {
         if (player == null || soundName == null || soundName.isEmpty()) return;
         try {
-            Sound sound = Sound.valueOf(soundName.toUpperCase());
+            Sound sound = null;
+            try {
+                org.bukkit.NamespacedKey key = org.bukkit.NamespacedKey.minecraft(soundName.toLowerCase(java.util.Locale.ROOT));
+                sound = org.bukkit.Registry.SOUNDS.get(key);
+            } catch (Throwable ignored) {}
+            if (sound == null) {
+                sound = Sound.valueOf(soundName.toUpperCase(java.util.Locale.ROOT));
+            }
             player.playSound(player.getLocation(), sound, volume, pitch);
         } catch (IllegalArgumentException e) {
             logger().warning("Unknown sound name in config: '" + soundName + "' (" + e.getMessage() + ")");

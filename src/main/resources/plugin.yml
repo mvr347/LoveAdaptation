@@ -14,13 +14,17 @@ commands:
   loveadaptationadmin:
     description: Admin command for LoveAdaptation plugin
     aliases: [ laadmin, лаадмин ]
-    usage: /loveadaptationadmin <reload|reset|check|givepotion>
+    usage: /loveadaptationadmin <reload|reset|check|givepotion|givebestiary>
     permission: loveadaptation.admin
+  bestiary:
+    description: Hunter's Bestiary command
+    aliases: [ бестиарий, hunterbestiary, fieldbestiary ]
+    permission: loveadaptation.use
 
 permissions:
   loveadaptation.use:
     description: Allows opening adaptation menu and checking info
     default: true
   loveadaptation.admin:
-    description: Allows using admin commands like reset, check, reload
+    description: Allows using admin commands like reset, check, reload, givebestiary
     default: op

@@ -1,6 +1,7 @@
 package me.lovelace.LoveAdaptation.managers;
 
 import me.lovelace.LoveAdaptation.LoveAdaptation;
+import me.lovelace.LoveAdaptation.bestiary.BestiaryManager;
 
 public class PluginManager {
 
@@ -8,6 +9,7 @@ public class PluginManager {
     private LoveAdaptation plugin;
     private AdaptationManager adaptationManager;
     private PotionManager potionManager;
+    private BestiaryManager bestiaryManager;
 
     private PluginManager() {
     }
@@ -23,6 +25,7 @@ public class PluginManager {
         this.plugin = plugin;
         this.adaptationManager = new AdaptationManager(plugin);
         this.potionManager = new PotionManager(plugin);
+        this.bestiaryManager = new BestiaryManager(plugin);
     }
 
     public LoveAdaptation getPlugin() {
@@ -35,5 +38,9 @@ public class PluginManager {
 
     public PotionManager getPotionManager() {
         return potionManager;
+    }
+
+    public BestiaryManager getBestiaryManager() {
+        return bestiaryManager;
     }
 }

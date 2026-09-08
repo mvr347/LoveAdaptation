@@ -67,25 +67,56 @@ public class PlayerListener implements Listener {
             }
         }
 
-        // Water tracking
-        if (player.isInWater() || player.isSwimming()) {
-            PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.WATER, 1);
-        }
+        boolean blockChanged = from.getBlockX() != to.getBlockX() || from.getBlockY() != to.getBlockY() || from.getBlockZ() != to.getBlockZ();
+        if (blockChanged) {
+            // Water tracking
+            if (player.isInWater() || player.isSwimming()) {
+                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.WATER, 1);
+            }
 
-        // Nether tracking
-        if (player.getWorld().getEnvironment() == World.Environment.NETHER) {
-            PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.NETHER, 1);
-        }
+            // Nether tracking
+            if (player.getWorld().getEnvironment() == World.Environment.NETHER) {
+                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.NETHER, 1);
+            }
 
-        // Cave tracking (Y < 32)
-        int caveY = PluginManager.getInstance().getPlugin().getConfig().getInt("adaptations.cave.y_threshold", 32);
-        if (to.getBlockY() < caveY) {
-            PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.CAVE, 1);
-        }
+            // Cave tracking (Y < 32)
+            int caveY = PluginManager.getInstance().getPlugin().getConfig().getInt("adaptations.cave.y_threshold", 32);
+            if (to.getBlockY() < caveY) {
+                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.CAVE, 1);
+            }
 
-        // End tracking
-        if (player.getWorld().getEnvironment() == World.Environment.THE_END) {
-            PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.END, 1);
+            // End tracking
+            if (player.getWorld().getEnvironment() == World.Environment.THE_END) {
+                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.END, 1);
+            }
+        }
+    }
+
+    private final java.util.Map<java.util.UUID, Long> lastEnderPearlTeleport = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(org.bukkit.event.player.PlayerTeleportEvent event) {
+        if (event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
+            lastEnderPearlTeleport.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityPotionEffect(org.bukkit.event.entity.EntityPotionEffectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getNewEffect() == null || event.getNewEffect().getType() != PotionEffectType.LEVITATION) return;
+
+        PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        boolean potionActive = data.isPotionActive();
+        if (potionActive || data.getCurrentAdaptation() == AdaptationType.END) {
+            AdaptationData endData = data.getAdaptationData(AdaptationType.END);
+            boolean isMastery = potionActive || (endData != null && endData.getProgressPercent() >= 90.0);
+            if (isMastery && PluginManager.getInstance().getPlugin().getConfig().getBoolean("adaptations.end.shulker_levitation_immunity", true)) {
+                event.setCancelled(true);
+                me.lovelace.LoveAdaptation.utils.Utils.sendActionBar(player, "&5[Повелитель Края] &aЛевитация рассеяна!");
+            }
         }
     }
 
@@ -101,8 +132,29 @@ public class PlayerListener implements Listener {
         AdaptationType active = data.getCurrentAdaptation();
         boolean potionActive = data.isPotionActive();
 
-        // Height adaptation fall damage reduction
+        // End adaptation Ender Pearl fall damage reduction
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            long lastPearl = lastEnderPearlTeleport.getOrDefault(player.getUniqueId(), 0L);
+            boolean isPearlFall = (System.currentTimeMillis() - lastPearl) < 1500;
+
+            if (isPearlFall && (potionActive || active == AdaptationType.END)) {
+                AdaptationData endData = data.getAdaptationData(AdaptationType.END);
+                boolean isMastery = potionActive || (endData != null && endData.getProgressPercent() >= 90.0);
+                double pearlReduction = isMastery
+                        ? PluginManager.getInstance().getPlugin().getConfig()
+                                .getDouble("adaptations.end.ender_pearl_damage_reduction_bonus", 1.0)
+                        : PluginManager.getInstance().getPlugin().getConfig()
+                                .getDouble("adaptations.end.ender_pearl_damage_reduction_base", 0.5);
+
+                if (pearlReduction >= 1.0) {
+                    event.setCancelled(true);
+                    return;
+                } else {
+                    event.setDamage(event.getDamage() * (1.0 - pearlReduction));
+                }
+            }
+
+            // Height adaptation fall damage reduction
             PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.HEIGHT, 1);
 
             if (potionActive || active == AdaptationType.HEIGHT) {
@@ -140,6 +192,7 @@ public class PlayerListener implements Listener {
             }
         }
     }
+
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {

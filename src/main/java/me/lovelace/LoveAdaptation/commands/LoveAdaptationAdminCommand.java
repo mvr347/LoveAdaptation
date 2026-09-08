@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = Arrays.asList("reload", "reset", "check", "givepotion", "help");
+    private static final List<String> SUBCOMMANDS = Arrays.asList("reload", "reset", "check", "givepotion", "givebestiary", "help");
 
     private final LoveAdaptation plugin;
 
@@ -56,6 +56,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
             case "reset" -> handleReset(sender, args);
             case "check" -> handleCheck(sender, args);
             case "givepotion" -> handleGivePotion(sender, args);
+            case "givebestiary" -> handleGiveBestiary(sender, args);
             default -> sendHelp(sender);
         }
         return true;
@@ -168,12 +169,39 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
         sender.sendMessage(Utils.color(prefix + "&aВыдали зелье адаптации уровня " + level + " игроку " + target.getName()));
     }
 
+    private void handleGiveBestiary(CommandSender sender, String[] args) {
+        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+
+        if (args.length < 2) {
+            if (sender instanceof Player player) {
+                ItemStack book = PluginManager.getInstance().getBestiaryManager().createBestiaryBook(player);
+                player.getInventory().addItem(book);
+                sender.sendMessage(Utils.color(prefix + "&aВам выдан Полевой Бестиарий!"));
+                return;
+            }
+            sender.sendMessage(Utils.color(prefix + "&cИспользование: /loveadaptationadmin givebestiary <player>"));
+            return;
+        }
+
+        Player target = Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.player_not_found", "&cИгрок не найден.")));
+            return;
+        }
+
+        ItemStack book = PluginManager.getInstance().getBestiaryManager().createBestiaryBook(target);
+        target.getInventory().addItem(book);
+        target.sendMessage(Utils.color("&aВам выдан Полевой Бестиарий!"));
+        sender.sendMessage(Utils.color(prefix + "&aВыдали Полевой Бестиарий игроку " + target.getName()));
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_header", "&8========== &6LoveAdaptation Admin &8==========")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reload", "&6/loveadaptationadmin reload &7- Перезагрузить конфигурацию")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reset", "&6/loveadaptationadmin reset <игрок> &7- Сбросить прогресс адаптаций игрока")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_check", "&6/loveadaptationadmin check <адаптация> [игрок] &7- Показать детальный прогресс адаптации")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_givepotion", "&6/loveadaptationadmin givepotion <игрок> <1|2> &7- Выдать зелье адаптации")));
+        sender.sendMessage(Utils.color("&6/loveadaptationadmin givebestiary <игрок> &7- Выдать книгу Полевого Бестиария"));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_footer", "&8==========================================")));
     }
 
@@ -200,7 +228,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
             return completions;
         }
 
-        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("givepotion"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("givepotion") || args[0].equalsIgnoreCase("givebestiary"))) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[1].toLowerCase())) completions.add(p.getName());
             }
