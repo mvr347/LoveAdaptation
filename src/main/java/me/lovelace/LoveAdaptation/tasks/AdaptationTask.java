@@ -24,6 +24,9 @@ public class AdaptationTask extends BukkitRunnable {
         long degradationCheckIntervalTicks = Math.max(20L, checkSeconds * 20L);
         long saveIntervalTicks = 300 * 20L; // 5 minutes
 
+        long passiveRegenCheckSeconds = plugin.getConfig().getLong("adaptations.combat.passive_regen.check_interval_seconds", 20);
+        long passiveRegenCheckIntervalTicks = Math.max(20L, passiveRegenCheckSeconds * 20L);
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(player.getUniqueId());
             if (data == null) continue;
@@ -35,6 +38,11 @@ public class AdaptationTask extends BukkitRunnable {
             if (tickCounter % degradationCheckIntervalTicks == 0) {
                 PluginManager.getInstance().getAdaptationManager().processDegradation(player, data);
                 PluginManager.getInstance().getAdaptationManager().evaluateActiveAdaptation(player, data);
+            }
+
+            // Periodic passive-regen roll for "Боевой закал" (see processCombatPassiveRegen)
+            if (tickCounter % passiveRegenCheckIntervalTicks == 0) {
+                PluginManager.getInstance().getAdaptationManager().processCombatPassiveRegen(player, data);
             }
         }
 

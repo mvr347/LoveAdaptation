@@ -24,8 +24,8 @@ adaptations:
     name: "Дельфин"
     description: "Ускорение в воде и улучшенное дыхание"
     color: "&9"
-    unlock_hours: 15
-    required_ticks: 1080000  # 15 hours in water ticks
+    unlock_hours: 25
+    required_ticks: 1800000  # 25 hours in water ticks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjA3ZGJhMjZmMjliOGEzYjcxYzg1ODhjNzZkNDVmMDdkNmU3ZjQ4YjdiODA4YjUxZTJjNTk0OThhYjljMTQ0ZDYifX19"
@@ -55,8 +55,8 @@ adaptations:
     name: "Адепт огня"
     description: "Снижение урона от огня и лавы"
     color: "&c"
-    unlock_hours: 12
-    required_ticks: 864000  # 12 hours in Nether ticks
+    unlock_hours: 20
+    required_ticks: 1440000  # 20 hours in Nether ticks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjEzYWZiNWJkM2NmNDNlZGRjNjQ1Y2MyNmNhMDNhM2E4MTgwZmJjNGExNGE2MTRlYmFkY2Q1NzFjYjliIn19fQ=="
@@ -80,8 +80,8 @@ adaptations:
     name: "Зрение во мраке"
     description: "Ночное видение в пещерах и подземелье"
     color: "&8"
-    unlock_hours: 10
-    required_ticks: 720000  # 10 hours at Y < 32
+    unlock_hours: 18
+    required_ticks: 1296000  # 18 hours at Y < 32
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDEyNjQ5NDk5YjkzNzU3YTA1YmExODVkMmZjMDAxMzAwYzJiNWI2MjVhMDcyNTkxYzI0YzhlYjQ0ZmY2ODkifX19"
@@ -104,8 +104,8 @@ adaptations:
     name: "Падальщик"
     description: "Снижение урона от падения"
     color: "&e"
-    unlock_falls: 10
-    required_events: 10
+    unlock_falls: 18
+    required_events: 18
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZTRkOTY2N2RkOGU5ZTY0MjYxN2RhMGFjMWJkZGY1YTk3ZDE3NzIyYzBhMzk4MGMxMjhiNDVjMTkwNzAifX19"
@@ -119,75 +119,74 @@ adaptations:
         duration_ticks: 40
         trigger: "after_fall_damage"
 
-  end:
+  abyss:
     enabled: true
-    name: "Повелитель Края"
-    description: "Скорость, защита в Энде, безвредный жемчуг и иммунитет к левитации"
-    color: "&5"
-    unlock_hours: 8
-    required_ticks: 576000  # 8 hours in The End
+    name: "Страж Бездны"
+    description: "Скрытность и защита в глубоких пещерах у бедрока, иммунитет к тьме"
+    color: "&8"
+    # Заменяет бывшую адаптацию Энда ("Скиталец Эндера"/"Повелитель Края") - тема сменена на
+    # выживание в самых глубоких пещерах (ниже y_threshold, ближе к бедроку/Deep Dark), а не
+    # на измерение Энда. unlock_hours поднят вместе с остальными адаптациями (было 8).
+    unlock_hours: 15
+    required_ticks: 1080000  # 15 hours below y_threshold
+    y_threshold: -40
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I5ODNlY2VhNTJlM2Y3ODNlNWYxY2Y2YWVkNWI0Yjc2NWVkZjhiNzc0ZDNlNTExM2EzNTAzYWIxYjY5YmEyIn19fQ=="
     degradation_rate_percent_per_hour: 5.0
     effects_base:
-      - type: "SPEED"
+      - type: "NIGHT_VISION"
         level: 1
-        apply_in: ["THE_END"]
-      - type: "RESISTANCE"
-        level: 1
-        apply_in: ["THE_END"]
+        apply_below_y: -40
     effects_bonus:
-      - type: "SPEED"
-        level: 2
-        apply_in: ["THE_END"]
-      - type: "RESISTANCE"
-        level: 2
-        apply_in: ["THE_END"]
-      - type: "REGENERATION"
+      - type: "NIGHT_VISION"
         level: 1
-        apply_in: ["THE_END"]
-    ender_pearl_damage_reduction_base: 0.5
-    ender_pearl_damage_reduction_bonus: 1.0  # 100% immunity to Ender Pearl fall damage at 90%+
-    shulker_levitation_immunity: true
+        apply_below_y: -40
+      - type: "SPEED"
+        level: 1
+        apply_below_y: -40
+    darkness_immunity: true  # рассеивает эффект Тьмы (Warden/Sculk Shrieker) на мастерстве 90%+
 
   combat:
     enabled: true
     name: "Боевой закал"
-    description: "Ускоренная регенерация после урона"
+    description: "Слабая регенерация в перерывах между боями (не постоянная)"
     color: "&4"
     # 100 было слишком мало — набиралось за пару минут под ударами нескольких зомби,
-    # тогда как другие адаптации требуют часы игры. Подняли до сопоставимого объёма.
-    unlock_damage: 5000.0
-    required_damage: 5000.0
+    # тогда как другие адаптации требуют часы игры. Подняли до сопоставимого объёма,
+    # затем ещё раз - вместе с общим увеличением времени прокачки всех адаптаций.
+    unlock_damage: 9000.0
+    required_damage: 9000.0
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmE2ZDM2NjBiN2QxYmMzYTgyM2E4MTJhNjYwZDRmZGMzY2M5NzkxOTNjNDNlNmI5YWIyY2I3YzgxYjdmNzEifX19"
     degradation_rate_percent_per_hour: 2.0
-    healing_boost_base: 1.5
-    healing_boost_bonus: 2.0
-    effects_base:
-      - type: "REGENERATION"
-        level: 2
-        duration_ticks: 100
-        trigger: "after_combat_damage"
-    effects_bonus:
-      - type: "REGENERATION"
-        level: 3
-        duration_ticks: 120
-        trigger: "after_combat_damage"
-      - type: "RESISTANCE"
-        level: 1
-        duration_ticks: 60
-        trigger: "after_combat_damage"
+    # Регенерация больше НЕ выдаётся за каждый полученный удар (раньше это делало её
+    # фактически постоянной и слишком сильной в затяжном бою). Теперь, пока активна эта
+    # адаптация, раз в check_interval_seconds она с шансом chance_* выдаёт слабую и короткую
+    # регенерацию - но только если игрок min_seconds_since_damage не получал урона и его
+    # уровень голода не ниже min_food_level (не голоден). См. AdaptationManager#processCombatPassiveRegen.
+    passive_regen:
+      enabled: true
+      check_interval_seconds: 20
+      min_seconds_since_damage: 60
+      min_food_level: 18
+      chance_base: 0.25
+      chance_bonus: 0.4
+      level_base: 0   # Regeneration I
+      level_bonus: 1  # Regeneration II
+      duration_ticks_base: 60   # 3 сек
+      duration_ticks_bonus: 100 # 5 сек
+    effects_base: []
+    effects_bonus: []
 
   travel:
     enabled: true
     name: "Странник"
     description: "Снижение траты голода при ходьбе"
     color: "&6"
-    unlock_km: 20.0
-    required_distance_blocks: 20000.0  # 20km = 20,000 blocks
+    unlock_km: 35.0
+    required_distance_blocks: 35000.0  # 35km = 35,000 blocks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
     head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU2YTJmNjMxZTUwZTg1MzAwZTFjMjA3YTBjNjJiZDUxYjc5Nzc4OGQwMDkzMTIxY2VmNmQ1ZWNlYTI5ZTNkIn19fQ=="
@@ -219,7 +218,7 @@ degradation_system:
 reactivation_priority:
   order:
     - NETHER
-    - THE_END
+    - ABYSS
     - CAVE
     - WATER
     - HEIGHT

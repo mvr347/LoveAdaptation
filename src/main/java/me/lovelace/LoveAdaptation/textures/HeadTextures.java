@@ -54,9 +54,11 @@ public final class HeadTextures {
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZTRkOTY2N2RkOGU5ZTY0MjYxN2RhMGFjMWJkZGY1YTk3ZDE3NzIyYzBhMzk4MGMxMjhiNDVjMTkwNzAifX19";
 
     /**
-     * Текстура головы адаптации «Скиталец Эндера» (Энд).
+     * Текстура головы адаптации «Страж Бездны» (бывший «Скиталец Эндера»/Энд, заменён на тему
+     * глубоких пещер/Deep Dark). Текстура временно унаследована от старой адаптации — админ
+     * может переопределить {@code adaptations.abyss.head_texture} в config.yml на свою.
      */
-    public static final String END =
+    public static final String ABYSS =
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I5ODNlY2VhNTJlM2Y3ODNlNWYxY2Y2YWVkNWI0Yjc2NWVkZjhiNzc0ZDNlNTExM2EzNTAzYWIxYjY5YmEyIn19fQ==";
 
     /**
@@ -92,7 +94,7 @@ public final class HeadTextures {
             case NETHER -> NETHER;
             case CAVE -> CAVE;
             case HEIGHT -> HEIGHT;
-            case END -> END;
+            case ABYSS -> ABYSS;
             case COMBAT -> COMBAT;
             case TRAVEL -> TRAVEL;
             case BASE -> BASE;

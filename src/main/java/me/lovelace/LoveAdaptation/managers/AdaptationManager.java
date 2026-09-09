@@ -23,9 +23,16 @@ public class AdaptationManager {
 
     private final LoveAdaptation plugin;
     private final Map<UUID, PlayerData> playerDataMap = new ConcurrentHashMap<>();
+    // Момент последнего полученного урона (любого) - нужен "боевому закалу", чтобы включать
+    // пассивную регенерацию только пока игрок какое-то время НЕ дерётся, а не постоянно.
+    private final Map<UUID, Long> lastDamageTime = new ConcurrentHashMap<>();
 
     public AdaptationManager(LoveAdaptation plugin) {
         this.plugin = plugin;
+    }
+
+    public void recordDamageTaken(UUID uuid) {
+        lastDamageTime.put(uuid, System.currentTimeMillis());
     }
 
     public PlayerData getPlayerData(UUID uuid) {
@@ -54,6 +61,7 @@ public class AdaptationManager {
     }
 
     public void unloadPlayer(Player player) {
+        lastDamageTime.remove(player.getUniqueId());
         PlayerData data = playerDataMap.remove(player.getUniqueId());
         if (data != null) {
             if (plugin.isEnabled()) {
@@ -164,7 +172,7 @@ public class AdaptationManager {
         // If current is not valid or degraded below 60%, check priority order for reactivation
         List<String> priorityList = plugin.getConfig().getStringList("reactivation_priority.order");
         if (priorityList.isEmpty()) {
-            priorityList = Arrays.asList("NETHER", "END", "CAVE", "WATER", "HEIGHT", "COMBAT", "TRAVEL");
+            priorityList = Arrays.asList("NETHER", "ABYSS", "CAVE", "WATER", "HEIGHT", "COMBAT", "TRAVEL");
         }
 
         AdaptationType bestMatch = AdaptationType.BASE;
@@ -224,8 +232,9 @@ public class AdaptationManager {
             case CAVE:
                 int caveY = plugin.getConfig().getInt("adaptations.cave.y_threshold", 32);
                 return player.getLocation().getBlockY() < caveY;
-            case END:
-                return player.getWorld().getEnvironment() == World.Environment.THE_END;
+            case ABYSS:
+                int abyssY = plugin.getConfig().getInt("adaptations.abyss.y_threshold", -40);
+                return player.getLocation().getBlockY() < abyssY;
             case HEIGHT:
                 return player.getFallDistance() > 3.0;
             case COMBAT:
@@ -284,6 +293,48 @@ public class AdaptationManager {
         }
     }
 
+    private final Random passiveRegenRandom = new Random();
+
+    /**
+     * "Боевой закал" больше не выдаёт регенерацию за каждый полученный удар (это делало её
+     * фактически постоянной и слишком сильной в затяжном бою) - вместо этого, пока адаптация
+     * активна, она изредка подлечивает игрока, только если он какое-то время не дрался
+     * (не получал урона) и не голоден. Вызывается из {@link me.lovelace.LoveAdaptation.tasks.AdaptationTask}
+     * с интервалом {@code adaptations.combat.passive_regen.check_interval_seconds}.
+     */
+    public void processCombatPassiveRegen(Player player, PlayerData data) {
+        if (!plugin.getConfig().getBoolean("adaptations.combat.passive_regen.enabled", true)) return;
+
+        boolean potionActive = data.isPotionActive();
+        if (!potionActive && data.getCurrentAdaptation() != AdaptationType.COMBAT) return;
+
+        Long lastDamage = lastDamageTime.get(player.getUniqueId());
+        long minSecondsSinceDamage = plugin.getConfig().getLong("adaptations.combat.passive_regen.min_seconds_since_damage", 60);
+        if (lastDamage != null && System.currentTimeMillis() - lastDamage < minSecondsSinceDamage * 1000L) {
+            return;
+        }
+
+        int minFoodLevel = plugin.getConfig().getInt("adaptations.combat.passive_regen.min_food_level", 18);
+        if (player.getFoodLevel() < minFoodLevel) return;
+
+        AdaptationData combatData = data.getAdaptationData(AdaptationType.COMBAT);
+        boolean isMastery = potionActive || (combatData != null && combatData.getProgressPercent() >= 90.0);
+
+        double chance = isMastery
+                ? plugin.getConfig().getDouble("adaptations.combat.passive_regen.chance_bonus", 0.4)
+                : plugin.getConfig().getDouble("adaptations.combat.passive_regen.chance_base", 0.25);
+        if (passiveRegenRandom.nextDouble() >= chance) return;
+
+        int level = isMastery
+                ? plugin.getConfig().getInt("adaptations.combat.passive_regen.level_bonus", 1)
+                : plugin.getConfig().getInt("adaptations.combat.passive_regen.level_base", 0);
+        int duration = isMastery
+                ? plugin.getConfig().getInt("adaptations.combat.passive_regen.duration_ticks_bonus", 100)
+                : plugin.getConfig().getInt("adaptations.combat.passive_regen.duration_ticks_base", 60);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, level, false, false));
+    }
+
     public void applyEffects(Player player, PlayerData data) {
         if (player == null || data == null || !player.isOnline()) return;
 
@@ -306,6 +357,13 @@ public class AdaptationManager {
                 String typeStr = (String) effectMap.get("type");
                 if (typeStr == null) continue;
 
+                // Записи с "trigger" (после урона в бою / после падения) — не для этого
+                // ежетикового цикла: они выдаются точечно из PlayerListener в момент события.
+                // Раньше этот цикл прикладывал их и тут тоже, из-за чего, например, регенерация
+                // "боевого закала" висела на игроке ПОСТОЯННО, пока активна адаптация, а не
+                // только после удара.
+                if (effectMap.containsKey("trigger")) continue;
+
                 int level = effectMap.containsKey("level") ? ((Number) effectMap.get("level")).intValue() : 1;
                 int duration = effectMap.containsKey("duration_ticks") ? ((Number) effectMap.get("duration_ticks")).intValue() : 40;
 
@@ -320,7 +378,6 @@ public class AdaptationManager {
                             String inCond = inList.get(0).toString();
                             if ("WATER".equalsIgnoreCase(inCond) && !player.isInWater()) continue;
                             if ("NETHER".equalsIgnoreCase(inCond) && player.getWorld().getEnvironment() != World.Environment.NETHER) continue;
-                            if ("THE_END".equalsIgnoreCase(inCond) && player.getWorld().getEnvironment() != World.Environment.THE_END) continue;
                         }
                     }
                     if (effectMap.containsKey("apply_below_y")) {
