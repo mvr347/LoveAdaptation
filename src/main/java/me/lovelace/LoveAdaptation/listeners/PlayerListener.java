@@ -69,8 +69,10 @@ public class PlayerListener implements Listener {
 
         boolean blockChanged = from.getBlockX() != to.getBlockX() || from.getBlockY() != to.getBlockY() || from.getBlockZ() != to.getBlockZ();
         if (blockChanged) {
-            // Water tracking
-            if (player.isInWater() || player.isSwimming()) {
+            // Water tracking - excludes drowning (remainingAir <= 0, actively taking suffocation
+            // damage): a player just holding their breath underwater shouldn't level up "Дельфин",
+            // only genuine swimming/diving time.
+            if ((player.isInWater() || player.isSwimming()) && player.getRemainingAir() > 0) {
                 PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.WATER, 1);
             }
 
@@ -85,37 +87,29 @@ public class PlayerListener implements Listener {
                 PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.CAVE, 1);
             }
 
-            // End tracking
-            if (player.getWorld().getEnvironment() == World.Environment.THE_END) {
-                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.END, 1);
+            // Abyss tracking (deep strata near bedrock, any dimension)
+            int abyssY = PluginManager.getInstance().getPlugin().getConfig().getInt("adaptations.abyss.y_threshold", -40);
+            if (to.getBlockY() < abyssY) {
+                PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.ABYSS, 1);
             }
-        }
-    }
-
-    private final java.util.Map<java.util.UUID, Long> lastEnderPearlTeleport = new java.util.concurrent.ConcurrentHashMap<>();
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerTeleport(org.bukkit.event.player.PlayerTeleportEvent event) {
-        if (event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
-            lastEnderPearlTeleport.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityPotionEffect(org.bukkit.event.entity.EntityPotionEffectEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        if (event.getNewEffect() == null || event.getNewEffect().getType() != PotionEffectType.LEVITATION) return;
+        if (event.getNewEffect() == null || event.getNewEffect().getType() != PotionEffectType.DARKNESS) return;
 
         PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(player.getUniqueId());
         if (data == null) return;
 
         boolean potionActive = data.isPotionActive();
-        if (potionActive || data.getCurrentAdaptation() == AdaptationType.END) {
-            AdaptationData endData = data.getAdaptationData(AdaptationType.END);
-            boolean isMastery = potionActive || (endData != null && endData.getProgressPercent() >= 90.0);
-            if (isMastery && PluginManager.getInstance().getPlugin().getConfig().getBoolean("adaptations.end.shulker_levitation_immunity", true)) {
+        if (potionActive || data.getCurrentAdaptation() == AdaptationType.ABYSS) {
+            AdaptationData abyssData = data.getAdaptationData(AdaptationType.ABYSS);
+            boolean isMastery = potionActive || (abyssData != null && abyssData.getProgressPercent() >= 90.0);
+            if (isMastery && PluginManager.getInstance().getPlugin().getConfig().getBoolean("adaptations.abyss.darkness_immunity", true)) {
                 event.setCancelled(true);
-                me.lovelace.LoveAdaptation.utils.Utils.sendActionBar(player, "&5[Повелитель Края] &aЛевитация рассеяна!");
+                me.lovelace.LoveAdaptation.utils.Utils.sendActionBar(player, "&8[Страж Бездны] &aТьма не властна над тобой!");
             }
         }
     }
@@ -132,28 +126,12 @@ public class PlayerListener implements Listener {
         AdaptationType active = data.getCurrentAdaptation();
         boolean potionActive = data.isPotionActive();
 
-        // End adaptation Ender Pearl fall damage reduction
+        // "Боевой закал" отслеживает момент последнего урона (любого, не только от боя) -
+        // пассивная регенерация в processCombatPassiveRegen выдаётся только после минуты
+        // затишья, так что метку нужно обновлять здесь безусловно.
+        PluginManager.getInstance().getAdaptationManager().recordDamageTaken(player.getUniqueId());
+
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            long lastPearl = lastEnderPearlTeleport.getOrDefault(player.getUniqueId(), 0L);
-            boolean isPearlFall = (System.currentTimeMillis() - lastPearl) < 1500;
-
-            if (isPearlFall && (potionActive || active == AdaptationType.END)) {
-                AdaptationData endData = data.getAdaptationData(AdaptationType.END);
-                boolean isMastery = potionActive || (endData != null && endData.getProgressPercent() >= 90.0);
-                double pearlReduction = isMastery
-                        ? PluginManager.getInstance().getPlugin().getConfig()
-                                .getDouble("adaptations.end.ender_pearl_damage_reduction_bonus", 1.0)
-                        : PluginManager.getInstance().getPlugin().getConfig()
-                                .getDouble("adaptations.end.ender_pearl_damage_reduction_base", 0.5);
-
-                if (pearlReduction >= 1.0) {
-                    event.setCancelled(true);
-                    return;
-                } else {
-                    event.setDamage(event.getDamage() * (1.0 - pearlReduction));
-                }
-            }
-
             // Height adaptation fall damage reduction
             PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.HEIGHT, 1);
 
@@ -213,22 +191,9 @@ public class PlayerListener implements Listener {
 
         if (damager instanceof Monster || damager instanceof Player) {
             long damageTaken = (long) event.getFinalDamage();
+            // Регенерация за удар убрана - "Боевой закал" теперь лечит понемногу и не постоянно,
+            // только после минуты без урона (см. AdaptationManager#processCombatPassiveRegen).
             PluginManager.getInstance().getAdaptationManager().addProgress(player, AdaptationType.COMBAT, damageTaken);
-
-            boolean potionActive = data.isPotionActive();
-            if (potionActive || data.getCurrentAdaptation() == AdaptationType.COMBAT) {
-                AdaptationData combatData = data.getAdaptationData(AdaptationType.COMBAT);
-                boolean isMastery = potionActive || (combatData != null && combatData.getProgressPercent() >= 90.0);
-
-                int regenLevel = isMastery ? 2 : 1; // 0-indexed: level 3 vs level 2
-                int duration = isMastery ? 120 : 100;
-                player.addPotionEffect(
-                        new PotionEffect(PotionEffectType.REGENERATION, duration, regenLevel, false, false));
-
-                if (isMastery) {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 0, false, false));
-                }
-            }
         }
     }
 

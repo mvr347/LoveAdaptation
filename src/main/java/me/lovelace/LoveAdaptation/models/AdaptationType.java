@@ -5,7 +5,10 @@ public enum AdaptationType {
     NETHER("nether", "NETHER", "ticks_in_nether"),
     CAVE("cave", "CAVE", "ticks_in_cave"),
     HEIGHT("height", "HEIGHT", "fall_damage_events"),
-    END("end", "END", "ticks_in_end"),
+    // dbName остаётся "END" (не "ABYSS") ради обратной совместимости: старые сохранённые
+    // игроки хранят это значение в БД как строку "END", а AdaptationType.fromString()
+    // резолвит её через dbName, так что переименование enum-константы не теряет прогресс.
+    ABYSS("abyss", "END", "ticks_in_abyss"),
     COMBAT("combat", "COMBAT", "damage_taken_from_hostiles"),
     TRAVEL("travel", "TRAVEL", "distance_walked"),
     BASE("base", "BASE", "none");
