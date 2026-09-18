@@ -349,6 +349,10 @@ gui:
   size: 54
   tab_mutations_title: "&6Мутации персонажа"
   refresh_interval_ticks: 20
+  # Команда (без /), которую выполняет кнопка "Назад" в меню, открытом через
+  # /adaptation mainmenu (например, для возврата в общее хаб-меню сервера).
+  # Пусто = кнопка неактивна, на её месте стекло — см. /loveadaptation menu.
+  mainmenu_back_command: ""
 
 lang:
   prefix: "&8[&6LoveAdaptation&8] "

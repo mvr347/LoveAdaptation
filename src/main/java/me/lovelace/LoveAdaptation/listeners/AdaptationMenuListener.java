@@ -1,5 +1,6 @@
 package me.lovelace.LoveAdaptation.listeners;
 
+import me.lovelace.LoveAdaptation.LoveAdaptation;
 import me.lovelace.LoveAdaptation.gui.AdaptationMenu;
 import me.lovelace.LoveAdaptation.gui.AdaptationMenuHolder;
 import me.lovelace.LoveAdaptation.managers.AdaptationManager;
@@ -8,6 +9,7 @@ import me.lovelace.LoveAdaptation.models.AdaptationData;
 import me.lovelace.LoveAdaptation.models.AdaptationType;
 import me.lovelace.LoveAdaptation.models.PlayerData;
 import me.lovelace.LoveAdaptation.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +18,12 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 public final class AdaptationMenuListener implements Listener {
+
+    private final LoveAdaptation plugin;
+
+    public AdaptationMenuListener(LoveAdaptation plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
@@ -44,6 +52,15 @@ public final class AdaptationMenuListener implements Listener {
 
         if (slot == AdaptationMenu.CLOSE_SLOT) {
             player.closeInventory();
+            return;
+        }
+
+        if (slot == AdaptationMenu.BACK_SLOT && holder instanceof AdaptationMenuHolder menuHolder) {
+            String backCommand = menuHolder.getBackCommand();
+            if (backCommand != null) {
+                player.closeInventory();
+                Bukkit.getScheduler().runTask(plugin, () -> player.performCommand(backCommand));
+            }
             return;
         }
 

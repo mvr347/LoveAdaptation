@@ -38,7 +38,7 @@ public class LoveAdaptation extends JavaPlugin {
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        getServer().getPluginManager().registerEvents(new AdaptationMenuListener(), this);
+        getServer().getPluginManager().registerEvents(new AdaptationMenuListener(this), this);
         getServer().getPluginManager().registerEvents(new me.lovelace.LoveAdaptation.bestiary.BestiaryListener(this, PluginManager.getInstance().getBestiaryManager()), this);
 
         // Register commands
