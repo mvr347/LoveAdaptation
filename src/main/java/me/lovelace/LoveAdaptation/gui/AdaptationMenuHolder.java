@@ -11,9 +11,19 @@ import org.jetbrains.annotations.NotNull;
 public final class AdaptationMenuHolder implements InventoryHolder {
 
     private Inventory inventory;
+    private String backCommand;
 
     void setInventory(Inventory inventory) {
         this.inventory = inventory;
+    }
+
+    /** Command (without the leading /) the Back button runs, or null if it's inactive (glass). */
+    void setBackCommand(String backCommand) {
+        this.backCommand = backCommand;
+    }
+
+    public String getBackCommand() {
+        return backCommand;
     }
 
     @Override

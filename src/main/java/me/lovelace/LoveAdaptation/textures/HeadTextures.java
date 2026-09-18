@@ -86,6 +86,13 @@ public final class HeadTextures {
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWZkMjQwMDAwMmFkOWZiYmJkMDA2Njk0MWViNWIxYTM4NGFiOWIwZTQ4YTE3OGVlOTZlNGQxMjlhNTIwODY1NCJ9fX0=";
 
     /**
+     * Текстура кнопки "Назад" нативного GUI (резерв на случай отсутствия ключа {@code back} в heads.yml)
+     * — стандартная иконка ← из gui-gen-скилла Love*-экосистемы.
+     */
+    public static final String BASE_BACK_FALLBACK =
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==";
+
+    /**
      * Возвращает резервную текстуру головы для указанного типа адаптации.
      */
     public static String forType(AdaptationType type) {

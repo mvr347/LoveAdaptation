@@ -33,15 +33,18 @@ public final class AdaptationMenu {
     public static final int SIZE = 54;
     public static final int PLAYER_HEAD_SLOT = 0;
     public static final int INFO_SLOT = 51;
+    public static final int BACK_SLOT = 52;
     public static final int CLOSE_SLOT = 53;
 
     // Боковые стенки рабочей зоны (18, 26, 27, 35, 36, 44) сюда не входят - по
     // gui-gen-5 (RULE 6) рабочая зона никогда не заполняется стеклом, только
-    // контентом или пустотой, даже по бокам.
+    // контентом или пустотой, даже по бокам. BACK_SLOT (52) тоже сюда не входит -
+    // это динамическая кнопка (RULE 2, п.5): стекло там появляется только когда
+    // Back неактивен, обрабатывается отдельно в open().
     private static final int[] BORDER_SLOTS = {
         1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
-        45, 46, 47, 48, 49, 50, 52
+        45, 46, 47, 48, 49, 50
     };
 
     private static final Map<Integer, AdaptationType> ADAPTATION_SLOTS = new LinkedHashMap<>();
@@ -67,10 +70,26 @@ public final class AdaptationMenu {
     }
 
     public void open(Player player) {
+        open(player, null);
+    }
+
+    /**
+     * Открывает то же самое меню (/adaptation mainmenu), но с активной кнопкой "Назад" в
+     * BACK_SLOT, если в config.yml (gui.mainmenu_back_command) настроена целевая команда -
+     * иначе на месте кнопки остаётся стекло (RULE 2, п.5: динамический элемент не может
+     * оставлять пустой слот).
+     */
+    public void openMainMenu(Player player) {
+        String backCommand = plugin.getConfig().getString("gui.mainmenu_back_command", "");
+        open(player, (backCommand == null || backCommand.isBlank()) ? null : backCommand);
+    }
+
+    private void open(Player player, String backCommand) {
         AdaptationMenuHolder holder = new AdaptationMenuHolder();
         Inventory inventory = Bukkit.createInventory(holder, SIZE,
                 Utils.color(guiConfig.getString("menu.title", "&6Адаптации персонажа")));
         holder.setInventory(inventory);
+        holder.setBackCommand(backCommand);
 
         ItemStack border = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta borderMeta = border.getItemMeta();
@@ -90,6 +109,12 @@ public final class AdaptationMenu {
                 HeadsConfig.get("info", HeadTextures.BASE_INFO_FALLBACK),
                 guiConfig.getString("items.info.name", "&bИнформация"),
                 guiConfig.getStringList("items.info.lore")));
+        inventory.setItem(BACK_SLOT, backCommand != null
+                ? Utils.createCustomHead(
+                        HeadsConfig.get("back", HeadTextures.BASE_BACK_FALLBACK),
+                        guiConfig.getString("items.back.name", "&7Назад"),
+                        guiConfig.getStringList("items.back.lore"))
+                : border);
         inventory.setItem(CLOSE_SLOT, Utils.createCustomHead(
                 HeadsConfig.get("close", HeadTextures.BASE_CLOSE_FALLBACK),
                 guiConfig.getString("items.close.name", "&cЗакрыть"),

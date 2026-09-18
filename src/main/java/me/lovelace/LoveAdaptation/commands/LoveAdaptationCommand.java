@@ -30,7 +30,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
 
-        if (args.length == 0 || args[0].equalsIgnoreCase("menu")) {
+        if (args.length == 0 || args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("mainmenu")) {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.only_players", "&cЭта команда доступна только игрокам.")));
                 return true;
@@ -40,7 +40,13 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
-            plugin.getAdaptationMenu().open(player);
+            // mainmenu = то же самое меню, но с кнопкой "Назад" (настраивается через
+            // gui.mainmenu_back_command в config.yml) - для открытия из общего хаб-меню сервера.
+            if (args.length > 0 && args[0].equalsIgnoreCase("mainmenu")) {
+                plugin.getAdaptationMenu().openMainMenu(player);
+            } else {
+                plugin.getAdaptationMenu().open(player);
+            }
             return true;
         }
 
@@ -123,6 +129,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_header", "&8========== &6LoveAdaptation Помощь &8==========")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_menu", "&6/adaptation menu &7- Открыть меню адаптаций и посмотреть прогресс")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_info", "&6/adaptation info [игрок] &7- Показать прогресс адаптаций")));
         if (sender.hasPermission("loveadaptation.admin")) {
             sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_admin", "&6/loveadaptationadmin &7- Административные команды LoveAdaptation")));
@@ -134,7 +141,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String s : Arrays.asList("menu", "info", "help")) {
+            for (String s : Arrays.asList("menu", "mainmenu", "info", "help")) {
                 if (s.startsWith(args[0].toLowerCase())) completions.add(s);
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
