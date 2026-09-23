@@ -30,7 +30,8 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
 
-        if (args.length == 0 || args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("mainmenu")) {
+        if (args.length == 0 || args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("mainmenu")
+                || args[0].equalsIgnoreCase("меню") || args[0].equalsIgnoreCase("главменю")) {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.only_players", "&cЭта команда доступна только игрокам.")));
                 return true;
@@ -40,9 +41,9 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
-            // mainmenu = то же самое меню, но с кнопкой "Назад" (настраивается через
+            // mainmenu / главменю = то же самое меню, но с кнопкой "Назад" (настраивается через
             // gui.mainmenu_back_command в config.yml) - для открытия из общего хаб-меню сервера.
-            if (args.length > 0 && args[0].equalsIgnoreCase("mainmenu")) {
+            if (args.length > 0 && (args[0].equalsIgnoreCase("mainmenu") || args[0].equalsIgnoreCase("главменю"))) {
                 plugin.getAdaptationMenu().openMainMenu(player);
             } else {
                 plugin.getAdaptationMenu().open(player);
@@ -52,7 +53,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
 
         String sub = args[0].toLowerCase();
 
-        if (sub.equals("info")) {
+        if (sub.equals("info") || sub.equals("инфо")) {
             Player target;
             if (args.length >= 2) {
                 target = Bukkit.getPlayer(args[1]);
@@ -102,7 +103,8 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
         // Админ-подкоманды (reset, check, givepotion, reload) переехали под единую
         // /loveadaptationadmin — здесь остаётся только понятная подсказка, чтобы команда не
         // «молчала» для тех, кто по привычке набирает /loveadaptation reload и т.п.
-        if (sub.equals("reset") || sub.equals("check") || sub.equals("givepotion") || sub.equals("reload")) {
+        if (sub.equals("reset") || sub.equals("check") || sub.equals("givepotion") || sub.equals("reload")
+                || sub.equals("сброс") || sub.equals("проверка") || sub.equals("выдатьзелье") || sub.equals("перезагрузка")) {
             if (!sender.hasPermission("loveadaptation.admin")) {
                 sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
@@ -111,7 +113,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (sub.equals("help")) {
+        if (sub.equals("help") || sub.equals("помощь")) {
             sendHelp(sender);
             return true;
         }
@@ -128,9 +130,9 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_header", "&8========== &6LoveAdaptation Помощь &8==========")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_menu", "&6/adaptation menu &7- Открыть меню адаптаций и посмотреть прогресс")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_info", "&6/adaptation info [игрок] &7- Показать прогресс адаптаций")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_menu", "&6/adaptation menu &7(или &6меню&7) &7- Открыть меню адаптаций и посмотреть прогресс")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7(или &6главменю&7) &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_info", "&6/adaptation info &7(или &6инфо&7) &7[игрок] &7- Показать прогресс адаптаций")));
         if (sender.hasPermission("loveadaptation.admin")) {
             sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_admin", "&6/loveadaptationadmin &7- Административные команды LoveAdaptation")));
         }
@@ -141,10 +143,10 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String s : Arrays.asList("menu", "mainmenu", "info", "help")) {
+            for (String s : Arrays.asList("menu", "меню", "mainmenu", "главменю", "info", "инфо", "help", "помощь")) {
                 if (s.startsWith(args[0].toLowerCase())) completions.add(s);
             }
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
+        } else if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("инфо"))) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[1].toLowerCase())) completions.add(p.getName());
             }
