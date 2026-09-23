@@ -29,7 +29,13 @@ import java.util.List;
  */
 public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = Arrays.asList("reload", "reset", "check", "givepotion", "givebestiary", "help");
+    private static final List<String> SUBCOMMANDS = Arrays.asList(
+            "reload", "перезагрузка",
+            "reset", "сброс",
+            "check", "проверка",
+            "givepotion", "выдатьзелье",
+            "givebestiary", "выдатьбестиарий",
+            "help", "помощь");
 
     private final LoveAdaptation plugin;
 
@@ -52,11 +58,11 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
         }
 
         switch (args[0].toLowerCase()) {
-            case "reload" -> handleReload(sender);
-            case "reset" -> handleReset(sender, args);
-            case "check" -> handleCheck(sender, args);
-            case "givepotion" -> handleGivePotion(sender, args);
-            case "givebestiary" -> handleGiveBestiary(sender, args);
+            case "reload", "перезагрузка" -> handleReload(sender);
+            case "reset", "сброс" -> handleReset(sender, args);
+            case "check", "проверка" -> handleCheck(sender, args);
+            case "givepotion", "выдатьзелье" -> handleGivePotion(sender, args);
+            case "givebestiary", "выдатьбестиарий" -> handleGiveBestiary(sender, args);
             default -> sendHelp(sender);
         }
         return true;
@@ -197,11 +203,11 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_header", "&8========== &6LoveAdaptation Admin &8==========")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reload", "&6/loveadaptationadmin reload &7- Перезагрузить конфигурацию")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reset", "&6/loveadaptationadmin reset <игрок> &7- Сбросить прогресс адаптаций игрока")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_check", "&6/loveadaptationadmin check <адаптация> [игрок] &7- Показать детальный прогресс адаптации")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_givepotion", "&6/loveadaptationadmin givepotion <игрок> <1|2> &7- Выдать зелье адаптации")));
-        sender.sendMessage(Utils.color("&6/loveadaptationadmin givebestiary <игрок> &7- Выдать книгу Полевого Бестиария"));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reload", "&6/loveadaptationadmin reload &7(или &6перезагрузка&7) &7- Перезагрузить конфигурацию")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_reset", "&6/loveadaptationadmin reset &7(или &6сброс&7) &7<игрок> &7- Сбросить прогресс адаптаций игрока")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_check", "&6/loveadaptationadmin check &7(или &6проверка&7) &7<адаптация> [игрок] &7- Показать детальный прогресс адаптации")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_givepotion", "&6/loveadaptationadmin givepotion &7(или &6выдатьзелье&7) &7<игрок> <1|2> &7- Выдать зелье адаптации")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_givebestiary", "&6/loveadaptationadmin givebestiary &7(или &6выдатьбестиарий&7) &7<игрок> &7- Выдать книгу Полевого Бестиария")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.admin_help_footer", "&8==========================================")));
     }
 
@@ -218,7 +224,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
             return completions;
         }
 
-        if (args.length == 2 && args[0].equalsIgnoreCase("check")) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("check") || args[0].equalsIgnoreCase("проверка"))) {
             for (AdaptationType type : AdaptationType.values()) {
                 if (type == AdaptationType.BASE) continue;
                 if (type.getConfigKey().startsWith(args[1].toLowerCase())) {
@@ -228,21 +234,23 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
             return completions;
         }
 
-        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("givepotion") || args[0].equalsIgnoreCase("givebestiary"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("сброс")
+                || args[0].equalsIgnoreCase("givepotion") || args[0].equalsIgnoreCase("выдатьзелье")
+                || args[0].equalsIgnoreCase("givebestiary") || args[0].equalsIgnoreCase("выдатьбестиарий"))) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[1].toLowerCase())) completions.add(p.getName());
             }
             return completions;
         }
 
-        if (args.length == 3 && args[0].equalsIgnoreCase("check")) {
+        if (args.length == 3 && (args[0].equalsIgnoreCase("check") || args[0].equalsIgnoreCase("проверка"))) {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[2].toLowerCase())) completions.add(p.getName());
             }
             return completions;
         }
 
-        if (args.length == 3 && args[0].equalsIgnoreCase("givepotion")) {
+        if (args.length == 3 && (args[0].equalsIgnoreCase("givepotion") || args[0].equalsIgnoreCase("выдатьзелье"))) {
             completions.addAll(Arrays.asList("1", "2"));
             return completions;
         }
