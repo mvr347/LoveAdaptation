@@ -11,9 +11,20 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Доступ к gui.yml — тексту служебных кнопок нативного меню адаптаций.
+ * Доступ к gui.yml — тексту и раскладке служебных кнопок нативного меню адаптаций.
+ *
+ * <p>С 2026-09-23 (по запросу владельца — довести GUI до той же степени
+ * настраиваемости, что и у LoveBehaivor: снимать/добавлять базовые кнопки,
+ * двигать их и добавлять полностью свои со своими текстурами и командами)
+ * базовые кнопки (info/back) дополнительно поддерживают {@code enabled}, а
+ * {@code items.custom_buttons} — список полностью новых кнопок. Для этого
+ * нужны {@link #getInt(String, int)}, {@link #getBoolean(String, boolean)} и
+ * {@link #getMapList(String)} в дополнение к уже существовавшим
+ * {@link #getString(String, String)}/{@link #getStringList(String)} — тот же
+ * набор методов, что и у {@code GuiConfigManager} в LoveBehaivor.</p>
  */
 public final class GuiConfig {
 
@@ -50,5 +61,23 @@ public final class GuiConfig {
     public List<String> getStringList(String path) {
         List<String> list = gui.getStringList(path);
         return list != null ? list : Collections.emptyList();
+    }
+
+    public int getInt(String path, int def) {
+        return gui.getInt(path, def);
+    }
+
+    public boolean getBoolean(String path, boolean def) {
+        return gui.getBoolean(path, def);
+    }
+
+    /**
+     * Список произвольных записей (карта ключ-значение на элемент) — например
+     * {@code items.custom_buttons}. Тот же формат, что YamlConfiguration использует
+     * для списков карт в других Love*-плагинах (ср. {@code GuiConfigManager#getMapList}
+     * у LoveBehaivor).
+     */
+    public List<Map<?, ?>> getMapList(String path) {
+        return gui.getMapList(path);
     }
 }

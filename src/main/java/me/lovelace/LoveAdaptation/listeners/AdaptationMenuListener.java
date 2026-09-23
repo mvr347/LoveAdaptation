@@ -9,7 +9,6 @@ import me.lovelace.LoveAdaptation.models.AdaptationData;
 import me.lovelace.LoveAdaptation.models.AdaptationType;
 import me.lovelace.LoveAdaptation.models.PlayerData;
 import me.lovelace.LoveAdaptation.utils.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,10 +18,14 @@ import org.bukkit.inventory.InventoryHolder;
 
 public final class AdaptationMenuListener implements Listener {
 
-    private final LoveAdaptation plugin;
-
+    // Больше не хранит plugin - раньше нужен был только для Bukkit.getScheduler().runTask() при
+    // диспатче команды "Назад" напрямую отсюда; с 2026-09-23 диспатч команд (Back и
+    // items.custom_buttons) выполняется в AdaptationMenu#dispatchConfiguredCommand при рендере
+    // (см. AdaptationMenu#renderBackButton/#renderCustomButtons), листенер только запускает уже
+    // зарегистрированное действие.
     public AdaptationMenuListener(LoveAdaptation plugin) {
-        this.plugin = plugin;
+        // plugin оставлен параметром конструктора ради обратной совместимости вызова в
+        // LoveAdaptation#onEnable (new AdaptationMenuListener(this)) - самому листенеру он не нужен.
     }
 
     @EventHandler
@@ -49,18 +52,18 @@ public final class AdaptationMenuListener implements Listener {
         }
         Player player = (Player) event.getWhoClicked();
         int slot = event.getRawSlot();
-
-        if (slot == AdaptationMenu.CLOSE_SLOT) {
-            player.closeInventory();
+        if (slot < 0) {
             return;
         }
 
-        if (slot == AdaptationMenu.BACK_SLOT && holder instanceof AdaptationMenuHolder menuHolder) {
-            String backCommand = menuHolder.getBackCommand();
-            if (backCommand != null) {
-                player.closeInventory();
-                Bukkit.getScheduler().runTask(plugin, () -> player.performCommand(backCommand));
-            }
+        // Since 2026-09-23 every clickable slot (Info/Back/Close, or a configured
+        // items.custom_buttons entry - see gui.yml) is registered as an action on the holder at
+        // render time in AdaptationMenu#open - buttons can be repositioned/disabled in config, so
+        // slot numbers are no longer compile-time constants the listener can switch on directly.
+        AdaptationMenuHolder menuHolder = (AdaptationMenuHolder) holder;
+        Runnable action = menuHolder.getAction(slot);
+        if (action != null) {
+            action.run();
             return;
         }
 
