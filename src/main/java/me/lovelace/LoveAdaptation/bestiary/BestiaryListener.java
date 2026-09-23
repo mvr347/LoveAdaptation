@@ -65,6 +65,18 @@ public class BestiaryListener implements Listener {
         Player killer = victim.getKiller();
         if (killer == null) return;
 
+        // bestiary.anti_abuse.farm_mob_progress_chance существовал в config.yml, но никогда не
+        // читался в коде: убийство моба из спавнера (AFK-ферма) засчитывалось как ПОЛНОЕ убийство
+        // наравне с честной охотой, хотя тир-бонусы Бестиария (+urn/+resistance, до +12%/+10% на
+        // 500 убийств) задуманы как награда именно за ручную охоту. Без этой проверки любая
+        // спавнер-ферма давала постоянные боевые баффы бесплатно и без ограничения по времени.
+        if (isFarmMob(victim) && plugin.getConfig().getBoolean("bestiary.anti_abuse.enabled", true)) {
+            double progressChance = plugin.getConfig().getDouble("bestiary.anti_abuse.farm_mob_progress_chance", 0.01);
+            if (Math.random() >= progressChance) {
+                return;
+            }
+        }
+
         bestiaryManager.addKill(killer, victim.getType());
     }
 
