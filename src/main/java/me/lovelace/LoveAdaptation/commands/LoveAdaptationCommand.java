@@ -113,6 +113,22 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (sub.equals("notifications") || sub.equals("уведомления")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.only_players", "&cЭта команда доступна только игрокам.")));
+                return true;
+            }
+            Player player = (Player) sender;
+            boolean enabled = PluginManager.getInstance().getAdaptationManager().toggleNotifications(player);
+            String msg = plugin.getConfig().getString("lang.notifications_toggled",
+                    "&7Уведомления адаптаций: %state%")
+                    .replace("%state%", enabled
+                            ? plugin.getConfig().getString("lang.notifications_on", "&aВКЛ")
+                            : plugin.getConfig().getString("lang.notifications_off", "&cВЫКЛ"));
+            player.sendMessage(Utils.color(prefix + msg));
+            return true;
+        }
+
         if (sub.equals("help") || sub.equals("помощь")) {
             sendHelp(sender);
             return true;
@@ -133,6 +149,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_menu", "&6/adaptation menu &7(или &6меню&7) &7- Открыть меню адаптаций и посмотреть прогресс")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7(или &6главменю&7) &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_info", "&6/adaptation info &7(или &6инфо&7) &7[игрок] &7- Показать прогресс адаптаций")));
+        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_notifications", "&6/adaptation notifications &7(или &6уведомления&7) &7- Вкл/выкл уведомлений адаптаций")));
         if (sender.hasPermission("loveadaptation.admin")) {
             sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_admin", "&6/loveadaptationadmin &7- Административные команды LoveAdaptation")));
         }
@@ -143,7 +160,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String s : Arrays.asList("menu", "меню", "mainmenu", "главменю", "info", "инфо", "help", "помощь")) {
+            for (String s : Arrays.asList("menu", "меню", "mainmenu", "главменю", "info", "инфо", "notifications", "уведомления", "help", "помощь")) {
                 if (s.startsWith(args[0].toLowerCase())) completions.add(s);
             }
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("инфо"))) {

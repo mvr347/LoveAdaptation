@@ -15,6 +15,7 @@ public class PlayerData {
     private String activePotionType; // "I" or "II" or null
     private long lastDegradationCheck;
     private long lastConditionCheck;
+    private boolean notificationsEnabled;
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -29,6 +30,7 @@ public class PlayerData {
         this.activePotionType = null;
         this.lastDegradationCheck = System.currentTimeMillis();
         this.lastConditionCheck = System.currentTimeMillis();
+        this.notificationsEnabled = true;
     }
 
     public UUID getUuid() {
@@ -93,5 +95,13 @@ public class PlayerData {
 
     public void setLastConditionCheck(long lastConditionCheck) {
         this.lastConditionCheck = lastConditionCheck;
+    }
+
+    public boolean isNotificationsEnabled() {
+        return notificationsEnabled;
+    }
+
+    public void setNotificationsEnabled(boolean notificationsEnabled) {
+        this.notificationsEnabled = notificationsEnabled;
     }
 }
