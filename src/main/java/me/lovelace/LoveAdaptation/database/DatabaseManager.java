@@ -107,8 +107,27 @@ public class DatabaseManager {
                     "expires_at INTEGER" +
                     ");");
 
+            // Per-player on/off switch for adaptation notifications (title/actionbar/sound) -
+            // added after player_adaptations already existed on live servers, so it's a
+            // migration rather than part of the CREATE TABLE above.
+            addColumnIfMissing(stmt, "player_adaptations", "notifications_enabled", "INTEGER DEFAULT 1");
+
         } catch (SQLException e) {
             plugin.getLogger().severe("Failed to create database tables: " + e.getMessage());
+        }
+    }
+
+    private static final java.util.regex.Pattern VALID_IDENTIFIER = java.util.regex.Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
+
+    private void addColumnIfMissing(Statement stmt, String table, String column, String definition) {
+        if (!VALID_IDENTIFIER.matcher(table).matches() || !VALID_IDENTIFIER.matcher(column).matches()) {
+            plugin.getLogger().warning("Invalid table or column name: " + table + ", " + column);
+            return;
+        }
+        try {
+            stmt.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+        } catch (SQLException e) {
+            // Column already exists from a previous run - safe to ignore.
         }
     }
 
@@ -128,6 +147,7 @@ public class DatabaseManager {
                         data.setCurrentAdaptation(AdaptationType.fromString(current));
                         data.setLastConditionCheck(rs.getLong("last_condition_check"));
                         data.setLastDegradationCheck(rs.getLong("last_degradation_check"));
+                        data.setNotificationsEnabled(rs.getInt("notifications_enabled") == 1);
                     } else {
                         // Insert new player
                         String insertPlayer = "INSERT INTO player_adaptations (uuid, current_adaptation, created_at, updated_at) VALUES (?, ?, ?, ?)";
@@ -196,20 +216,22 @@ public class DatabaseManager {
             conn.setAutoCommit(false);
 
             // Update player_adaptations
-            String sqlPlayer = "INSERT INTO player_adaptations (uuid, current_adaptation, current_progress_percent, created_at, updated_at) "
+            String sqlPlayer = "INSERT INTO player_adaptations (uuid, current_adaptation, current_progress_percent, notifications_enabled, created_at, updated_at) "
                     +
-                    "VALUES (?, ?, ?, ?, ?) " +
+                    "VALUES (?, ?, ?, ?, ?, ?) " +
                     "ON CONFLICT(uuid) DO UPDATE SET " +
                     "current_adaptation = excluded.current_adaptation, " +
                     "current_progress_percent = excluded.current_progress_percent, " +
+                    "notifications_enabled = excluded.notifications_enabled, " +
                     "updated_at = excluded.updated_at;";
             try (PreparedStatement stmt = conn.prepareStatement(sqlPlayer)) {
                 stmt.setString(1, data.getUuid().toString());
                 stmt.setString(2, data.getCurrentAdaptation().name());
                 AdaptationData currentAdaptData = data.getAdaptationData(data.getCurrentAdaptation());
                 stmt.setDouble(3, currentAdaptData != null ? currentAdaptData.getProgressPercent() : 0.0);
-                stmt.setLong(4, now);
+                stmt.setInt(4, data.isNotificationsEnabled() ? 1 : 0);
                 stmt.setLong(5, now);
+                stmt.setLong(6, now);
                 stmt.executeUpdate();
             }
 

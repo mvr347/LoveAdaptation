@@ -254,6 +254,14 @@ notifications:
     sound: "ENTITY_PLAYER_LEVELUP"
     sound_volume: 1.0
     sound_pitch: 1.2
+    # 2026-09-25: без этой задержки уведомление повторялось при каждом падении подряд после
+    # первой разблокировки "Падальщика" - деградация (adaptations.height.degradation_rate_percent_per_hour)
+    # снимает прогресс только с отображаемого процента, а не со счётчика событий, поэтому
+    # следующее же засчитавшееся событие пересчитывало процент обратно к 90% и адаптация
+    # "разблокировывалась" заново. 5 минут даёт игроку не более одного праздничного
+    # титра+звука за это время на одну адаптацию, при этом мастерство остаётся активным
+    # постоянно - деградация не пропадает, просто не спамит.
+    cooldown_seconds: 300
   adaptation_activated:
     enabled: true
     actionbar: "&aАдаптация активна: &f%adaptation_name%"
@@ -266,6 +274,10 @@ notifications:
     sound: "ENTITY_GENERIC_HURT"
     sound_volume: 0.5
     sound_pitch: 0.8
+    # 2026-09-25: тот же спам-баг, что и у mastery_unlock.cooldown_seconds выше, только с
+    # обратной стороны - без задержки actionbar "деградирует" срабатывал на каждой проверке
+    # деградации (degradation_system.check_interval_seconds), пока процент топчется вокруг 90%.
+    cooldown_seconds: 300
   adaptation_deactivated:
     enabled: true
     actionbar: "&cАдаптация потеряна: &f%adaptation_name%"
@@ -374,6 +386,10 @@ lang:
   help_menu: "&6/adaptation menu &7(или &6меню&7) &7- Открыть меню адаптаций и посмотреть прогресс"
   help_mainmenu: "&6/adaptation mainmenu &7(или &6главменю&7) &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)"
   help_info: "&6/adaptation info &7(или &6инфо&7) &7[игрок] &7- Показать прогресс адаптаций"
+  help_notifications: "&6/adaptation notifications &7(или &6уведомления&7) &7- Вкл/выкл уведомлений адаптаций"
+  notifications_toggled: "&7Уведомления адаптаций: %state%"
+  notifications_on: "&aВКЛ"
+  notifications_off: "&cВЫКЛ"
   help_admin: "&6/loveadaptationadmin &7- Административные команды LoveAdaptation"
   help_footer: "&8=========================================="
   admin_help_header: "&8========== &6LoveAdaptation Admin &8=========="

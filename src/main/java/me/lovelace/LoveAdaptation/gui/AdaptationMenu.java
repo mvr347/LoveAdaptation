@@ -48,6 +48,10 @@ public final class AdaptationMenu {
     public static final int INFO_SLOT = 51;
     public static final int BACK_SLOT = 52;
     public static final int CLOSE_SLOT = 53;
+    // Единственная сегодня кнопка управления (Вк) этого меню - gui_gen v2.1 RULE 4: 1 Вк
+    // центрируется на слоте 4 или 5 диапазона 2-7. Слот 4 сюда не входит в BORDER_SLOTS ниже
+    // (как и INFO_SLOT/BACK_SLOT) - рендерится динамически в renderNotificationsButton().
+    public static final int NOTIFICATIONS_SLOT = 4;
 
     private static final String EMPTY_NAME = " ";
     private static final String FILLER_MATERIAL_DEFAULT = "GRAY_STAINED_GLASS_PANE";
@@ -58,7 +62,7 @@ public final class AdaptationMenu {
     // входят - это динамические кнопки (RULE 2, п.5): стекло там появляется
     // только когда кнопка неактивна/выключена, обрабатывается отдельно в open().
     private static final int[] BORDER_SLOTS = {
-        1, 2, 3, 4, 5, 6, 7, 8,
+        1, 2, 3, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
         45, 46, 47, 48, 49, 50
     };
@@ -139,12 +143,57 @@ public final class AdaptationMenu {
         occupied.add(CLOSE_SLOT);
         occupied.addAll(ADAPTATION_SLOTS.keySet());
 
+        renderNotificationsButton(inventory, holder, occupied, border, backCommand, player);
         renderInfoButton(inventory, holder, occupied, border);
         renderBackButton(inventory, holder, occupied, backCommand, border, player);
         renderCloseButton(inventory, holder, player);
         renderCustomButtons(inventory, holder, occupied, player);
 
         player.openInventory(inventory);
+    }
+
+    /**
+     * Notifications - единственная сегодня кнопка управления (Вк, gui_gen v2.1 RULE 4) этого
+     * меню, слот 4 (центр диапазона 2-7 для одной Вк). Переключает per-player уведомления
+     * адаптаций (title/actionbar/sound из AdaptationManager) - клик тут же перерисовывает то же
+     * самое меню в тех же условиях (тот же backCommand), а не закрывает инвентарь, чтобы игрок
+     * сразу увидел новое состояние. Может быть выключена в gui.yml (items.notifications.enabled) -
+     * тогда слот остаётся стеклом (RULE 2, п.5).
+     */
+    private void renderNotificationsButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
+                                            ItemStack border, String backCommand, Player viewer) {
+        boolean enabledInConfig = guiConfig.getBoolean("items.notifications.enabled", true);
+        if (!enabledInConfig) {
+            inventory.setItem(NOTIFICATIONS_SLOT, border);
+            return;
+        }
+        occupied.add(NOTIFICATIONS_SLOT);
+
+        PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(viewer.getUniqueId());
+        boolean notificationsOn = data == null || data.isNotificationsEnabled();
+
+        String texture = guiConfig.getString("items.notifications.texture_base64", "");
+        String material = guiConfig.getString("items.notifications.material", notificationsOn ? "BELL" : "GRAY_DYE");
+        String name = guiConfig.getString("items.notifications.name",
+                notificationsOn ? "&aУведомления: &fВКЛ" : "&cУведомления: &fВЫКЛ");
+        List<String> lore = guiConfig.getStringList("items.notifications.lore");
+        if (lore.isEmpty()) {
+            lore = List.of("", "&7Титры/сообщения/звуки", "&7о прокачке и деградации адаптаций.", "", "&aЛКМ &7- переключить");
+        }
+
+        ItemStack item = GuiItemBuilder.resolveIcon(texture, material, null, name, lore);
+        inventory.setItem(NOTIFICATIONS_SLOT, item);
+        holder.registerAction(NOTIFICATIONS_SLOT, () -> {
+            PluginManager.getInstance().getAdaptationManager().toggleNotifications(viewer);
+            // Deferred a tick, same pattern as dispatchConfiguredCommand() below - reopening the
+            // inventory synchronously from inside InventoryClickEvent handling can race Bukkit's
+            // own post-click inventory update.
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (viewer.isOnline()) {
+                    open(viewer, backCommand);
+                }
+            });
+        });
     }
 
     /**

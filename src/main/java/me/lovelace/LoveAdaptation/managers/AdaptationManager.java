@@ -39,6 +39,16 @@ public class AdaptationManager {
         return playerDataMap.get(uuid);
     }
 
+    /** Flips the per-player on/off switch for adaptation notifications and returns the new state. */
+    public boolean toggleNotifications(Player player) {
+        PlayerData data = getPlayerData(player.getUniqueId());
+        if (data == null) return true;
+        boolean newState = !data.isNotificationsEnabled();
+        data.setNotificationsEnabled(newState);
+        plugin.getDatabaseManager().savePlayerData(data);
+        return newState;
+    }
+
     public void loadPlayer(Player player) {
         UUID uuid = player.getUniqueId();
         plugin.getDatabaseManager().loadPlayerData(uuid).thenAccept(data -> {
@@ -135,21 +145,38 @@ public class AdaptationManager {
     }
 
     private void handleMasteryUnlock(Player player, PlayerData playerData, AdaptationData adaptData) {
+        // addProgress() calls this every time progressPercent recrosses 90% from below - which,
+        // once already unlocked, happens on essentially every subsequent qualifying event: each
+        // periodic degradation tick (AdaptationTask, every degradation_system.check_interval_seconds)
+        // nudges progressPercent a fraction below the cap without touching the underlying
+        // progressValue counter, so the very next qualifying event (e.g. one more fall for HEIGHT)
+        // recomputes percent straight back to the cap and would re-trigger the full celebration
+        // (title+sound+history log) again - a permanent flap between "Мастерство разблокировано"
+        // and "деградирует" instead of a one-time achievement. Cooldown-gate the celebratory
+        // effects; the mechanical state below (current adaptation, active flag) still updates
+        // every time regardless, so nothing about the actual gameplay bonus is delayed.
+        long cooldownMs = plugin.getConfig().getLong("notifications.mastery_unlock.cooldown_seconds", 300) * 1000L;
+        long now = System.currentTimeMillis();
+        boolean onCooldown = (now - adaptData.getLastMasteryNotifyAt()) < cooldownMs;
+
         adaptData.setUnlocked(true);
-        adaptData.setUnlockedAt(System.currentTimeMillis());
+        adaptData.setUnlockedAt(now);
 
-        plugin.getDatabaseManager().logHistory(player.getUniqueId(), adaptData.getType().name(), "MASTERY_UNLOCK", adaptData.getProgressPercent(), "Mastery 90% unlocked");
+        if (!onCooldown) {
+            adaptData.setLastMasteryNotifyAt(now);
+            plugin.getDatabaseManager().logHistory(player.getUniqueId(), adaptData.getType().name(), "MASTERY_UNLOCK", adaptData.getProgressPercent(), "Mastery 90% unlocked");
 
-        if (plugin.getConfig().getBoolean("notifications.mastery_unlock.enabled", true)) {
-            String name = getAdaptationDisplayName(adaptData.getType());
-            String title = plugin.getConfig().getString("notifications.mastery_unlock.title", "&6✨ Мастерство разблокировано");
-            String subtitle = plugin.getConfig().getString("notifications.mastery_unlock.subtitle", "&f%adaptation_name%").replace("%adaptation_name%", name);
-            String sound = plugin.getConfig().getString("notifications.mastery_unlock.sound", "ENTITY_PLAYER_LEVELUP");
-            float vol = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_volume", 1.0);
-            float pitch = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_pitch", 1.2);
+            if (playerData.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.mastery_unlock.enabled", true)) {
+                String name = getAdaptationDisplayName(adaptData.getType());
+                String title = plugin.getConfig().getString("notifications.mastery_unlock.title", "&6✨ Мастерство разблокировано");
+                String subtitle = plugin.getConfig().getString("notifications.mastery_unlock.subtitle", "&f%adaptation_name%").replace("%adaptation_name%", name);
+                String sound = plugin.getConfig().getString("notifications.mastery_unlock.sound", "ENTITY_PLAYER_LEVELUP");
+                float vol = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_volume", 1.0);
+                float pitch = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_pitch", 1.2);
 
-            player.sendTitle(Utils.color(title), Utils.color(subtitle), 10, 60, 20);
-            Utils.playSound(player, sound, vol, pitch);
+                player.sendTitle(Utils.color(title), Utils.color(subtitle), 10, 60, 20);
+                Utils.playSound(player, sound, vol, pitch);
+            }
         }
 
         // Set as current active adaptation if higher or available
@@ -210,7 +237,7 @@ public class AdaptationManager {
             AdaptationData newData = data.getAdaptationData(newType);
             if (newData != null) newData.setActive(true);
 
-            if (plugin.getConfig().getBoolean("notifications.adaptation_activated.enabled", true)) {
+            if (data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_activated.enabled", true)) {
                 String name = getAdaptationDisplayName(newType);
                 String msg = plugin.getConfig().getString("notifications.adaptation_activated.actionbar", "&aАдаптация активна: &f%adaptation_name%").replace("%adaptation_name%", name);
                 String sound = plugin.getConfig().getString("notifications.adaptation_activated.sound", "BLOCK_RESPAWN_ANCHOR_CHARGE");
@@ -267,14 +294,22 @@ public class AdaptationManager {
             adaptData.setProgressPercent(newPercent);
 
             if (oldPercent >= 90.0 && newPercent < 90.0) {
-                // Lost mastery
-                if (plugin.getConfig().getBoolean("notifications.adaptation_degrading.enabled", true)) {
-                    String name = getAdaptationDisplayName(current);
-                    String msg = plugin.getConfig().getString("notifications.adaptation_degrading.actionbar", "&c⚠ Адаптация деградирует: &f%adaptation_name% (%progress%)")
-                            .replace("%adaptation_name%", name)
-                            .replace("%progress%", String.format("%.1f%%", newPercent));
-                    Utils.sendActionBar(player, msg);
-                    Utils.playSound(player, "ENTITY_GENERIC_HURT", 0.5f, 0.8f);
+                // Lost mastery. Cooldown-gated for the same reason as handleMasteryUnlock's
+                // celebration: once percent sits right at the cap, degradation crosses this same
+                // 90% line on effectively every check tick until a fresh fall pushes it back up,
+                // so without a cooldown this actionbar would fire once a minute forever.
+                long degradingCooldownMs = plugin.getConfig().getLong("notifications.adaptation_degrading.cooldown_seconds", 300) * 1000L;
+                long now = System.currentTimeMillis();
+                if (now - adaptData.getLastDegradingNotifyAt() >= degradingCooldownMs) {
+                    adaptData.setLastDegradingNotifyAt(now);
+                    if (data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_degrading.enabled", true)) {
+                        String name = getAdaptationDisplayName(current);
+                        String msg = plugin.getConfig().getString("notifications.adaptation_degrading.actionbar", "&c⚠ Адаптация деградирует: &f%adaptation_name% (%progress%)")
+                                .replace("%adaptation_name%", name)
+                                .replace("%progress%", String.format("%.1f%%", newPercent));
+                        Utils.sendActionBar(player, msg);
+                        Utils.playSound(player, "ENTITY_GENERIC_HURT", 0.5f, 0.8f);
+                    }
                 }
             }
 
@@ -283,7 +318,7 @@ public class AdaptationManager {
                 // Lost active status
                 adaptData.setActive(false);
                 switchAdaptation(player, data, AdaptationType.BASE);
-                if (plugin.getConfig().getBoolean("notifications.adaptation_deactivated.enabled", true)) {
+                if (data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_deactivated.enabled", true)) {
                     String name = getAdaptationDisplayName(current);
                     String msg = plugin.getConfig().getString("notifications.adaptation_deactivated.actionbar", "&cАдаптация потеряна: &f%adaptation_name%").replace("%adaptation_name%", name);
                     Utils.sendActionBar(player, msg);

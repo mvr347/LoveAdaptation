@@ -10,6 +10,14 @@ public class AdaptationData {
     private long activatedAt;
     private long deactivatedAt;
     private long lastConditionFulfilledTime;
+    // In-memory only (not persisted - a cooldown resetting across a restart is an acceptable
+    // edge case, same tradeoff as AdaptationManager#lastDamageTime). Guards against the
+    // celebratory mastery-unlock notification and the "деградирует" actionbar re-firing every
+    // single time progressPercent oscillates back and forth across the 90% line - see
+    // AdaptationManager#handleMasteryUnlock/#processDegradation for why that oscillation happens
+    // on every subsequent qualifying event once already unlocked.
+    private long lastMasteryNotifyAt;
+    private long lastDegradingNotifyAt;
 
     public AdaptationData(AdaptationType type) {
         this.type = type;
@@ -104,5 +112,21 @@ public class AdaptationData {
 
     public void setLastConditionFulfilledTime(long lastConditionFulfilledTime) {
         this.lastConditionFulfilledTime = lastConditionFulfilledTime;
+    }
+
+    public long getLastMasteryNotifyAt() {
+        return lastMasteryNotifyAt;
+    }
+
+    public void setLastMasteryNotifyAt(long lastMasteryNotifyAt) {
+        this.lastMasteryNotifyAt = lastMasteryNotifyAt;
+    }
+
+    public long getLastDegradingNotifyAt() {
+        return lastDegradingNotifyAt;
+    }
+
+    public void setLastDegradingNotifyAt(long lastDegradingNotifyAt) {
+        this.lastDegradingNotifyAt = lastDegradingNotifyAt;
     }
 }
