@@ -465,6 +465,19 @@ public class BestiaryManager {
         return hover.build();
     }
 
+    // Vanilla written books wrap plain paragraph text at roughly 19 characters per line and
+    // show about 14 lines per page at the default font. Bold text (titles, stat badges,
+    // footer bonuses below) renders with noticeably wider glyphs in Minecraft's default font,
+    // so the same character budget wraps a line earlier in the real client than it does here -
+    // use a tighter budget for anything built with TextDecoration.BOLD so our own line count
+    // matches what the player actually sees instead of under-counting it.
+    private static final int WRAP_WIDTH = 19;
+    private static final int BOLD_WRAP_WIDTH = 15;
+    // One line of safety margin below the vanilla ~14-line page: wrapText() is only an
+    // approximation of the client's real pixel-width wrapping, so the very last line of
+    // visible space is never bet on that approximation being exact.
+    private static final int MAX_LINES_PER_PAGE = 13;
+
     /**
      * Разбивает длинный текст на строки с учетом максимальной ширины строки в символах.
      */
@@ -503,28 +516,107 @@ public class BestiaryManager {
         return lines;
     }
 
-    private Component createFooterLine(ResearchTier tier, int speciesKills, Component hoverTooltip) {
-        TextComponent.Builder footerLine = Component.text();
+    /**
+     * Builds the physical line(s) for a page's mob title: name, family (once discovered) and,
+     * on multi-page entries, the "[page/total]" marker. Long name+family combinations (e.g.
+     * "Зомби-пиглин (Немертвые)") exceed a bold line's pixel width even though they fit under
+     * wrapText()'s plain-text budget, so this falls back to a second line rather than silently
+     * overflowing the page - see {@link #titleLineCount} for the matching budgeting counterpart.
+     */
+    private List<Component> buildTitleLines(String mobName, String familyShort, boolean familyDiscovered,
+                                             int pageNum, int totalMobPages) {
+        String familyToken = familyDiscovered ? "(" + familyShort + ")" : null;
+        String markerToken = totalMobPages > 1 ? "[" + pageNum + "/" + totalMobPages + "]" : null;
+        int oneLineLen = mobName.length()
+                + (familyToken != null ? 1 + familyToken.length() : 0)
+                + (markerToken != null ? 1 + markerToken.length() : 0);
+
+        List<Component> lines = new ArrayList<>();
+        TextComponent.Builder first = Component.text()
+                .append(Component.text(mobName, NamedTextColor.DARK_BLUE, TextDecoration.BOLD));
+        if (oneLineLen <= BOLD_WRAP_WIDTH) {
+            if (familyToken != null) first.append(Component.text(" " + familyToken, NamedTextColor.DARK_GRAY));
+            if (markerToken != null) first.append(Component.text(" " + markerToken, NamedTextColor.DARK_GRAY));
+            lines.add(first.build());
+        } else {
+            lines.add(first.build());
+            TextComponent.Builder second = Component.text();
+            if (familyToken != null) second.append(Component.text(familyToken, NamedTextColor.DARK_GRAY));
+            if (markerToken != null) {
+                second.append(Component.text((familyToken != null ? " " : "") + markerToken, NamedTextColor.DARK_GRAY));
+            }
+            lines.add(second.build());
+        }
+        return lines;
+    }
+
+    /**
+     * Line count {@link #buildTitleLines} would produce, without building any Components -
+     * used to size the per-page content budget before we know exact page numbers. The exact
+     * digits of the page marker never change whether it needs a second line in practice
+     * (Bestiary entries never run long enough to need double-digit page counts), so a
+     * representative "[1/2]" marker is used to decide the line count.
+     */
+    private int titleLineCount(String mobName, String familyShort, boolean familyDiscovered, boolean withMarker) {
+        String familyToken = familyDiscovered ? "(" + familyShort + ")" : null;
+        String markerToken = withMarker ? "[1/2]" : null;
+        int oneLineLen = mobName.length()
+                + (familyToken != null ? 1 + familyToken.length() : 0)
+                + (markerToken != null ? 1 + markerToken.length() : 0);
+        return oneLineLen <= BOLD_WRAP_WIDTH ? 1 : 2;
+    }
+
+    /**
+     * Kill count has no upper bound, so "Убито: N | badge [?]" on one bold line eventually
+     * overflows for any long-term hunter (3+ digit kill counts) even though the badge text
+     * itself is short. Always split onto two fixed lines instead of gambling on it fitting.
+     */
+    private List<Component> buildStatsLines(int speciesKills, String recordBadge) {
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.text()
+                .append(Component.text("Убито: ", NamedTextColor.BLACK))
+                .append(Component.text(String.valueOf(speciesKills), NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
+                .build());
+        lines.add(Component.text()
+                .append(Component.text(recordBadge, NamedTextColor.GOLD, TextDecoration.BOLD))
+                .append(Component.text(" [?]", NamedTextColor.DARK_AQUA, TextDecoration.BOLD))
+                .build());
+        return lines;
+    }
+
+    /**
+     * Builds the buffs footer as a list of physical lines (1-3 depending on tier/resistance)
+     * instead of a single Component with embedded "\n" - the old single-line "Бонус: +X% ур.
+     * +Y% защ." combo silently exceeded a bold line's width at tier 2/3, and pagination needs
+     * to know the real line count to size the content budget correctly.
+     */
+    private List<Component> buildFooterLines(ResearchTier tier, int speciesKills) {
+        List<Component> lines = new ArrayList<>();
         if (tier == ResearchTier.NONE) {
             if (speciesKills >= 50) {
-                footerLine.append(Component.text("✔ Анатомия изучена\n", NamedTextColor.DARK_GREEN, TextDecoration.BOLD));
-                footerLine.append(Component.text("[⭐ Наведите для баффов]", NamedTextColor.DARK_BLUE, TextDecoration.UNDERLINED));
-            } else {
-                footerLine.append(Component.text("[⭐ Наведите для бонусов]", NamedTextColor.DARK_BLUE, TextDecoration.UNDERLINED));
+                lines.add(Component.text("✔ Анатомия изучена", NamedTextColor.DARK_GREEN, TextDecoration.BOLD));
             }
+            lines.add(Component.text("[⭐ Наведите для бонусов]", NamedTextColor.DARK_BLUE, TextDecoration.UNDERLINED));
         } else {
             int dmgPct = (int) Math.round(getTierBonusDamage(tier) * 100);
-            footerLine.append(Component.text("⭐ Бонус: ", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
-                    .append(Component.text("+" + dmgPct + "% ур. ", NamedTextColor.DARK_GREEN, TextDecoration.BOLD));
+            lines.add(Component.text()
+                    .append(Component.text("⭐ Бонус: ", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
+                    .append(Component.text("+" + dmgPct + "% ур.", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
+                    .build());
             double res = getTierResistance(tier);
             if (res > 0.0) {
                 int resPct = (int) Math.round(res * 100);
-                footerLine.append(Component.text("+" + resPct + "% защ.", NamedTextColor.DARK_GREEN));
+                lines.add(Component.text("+" + resPct + "% защ.", NamedTextColor.DARK_GREEN));
             }
-            footerLine.append(Component.text("\n[Наведите для деталей]", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
+            lines.add(Component.text("[Наведите для деталей]", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
         }
-        footerLine.hoverEvent(HoverEvent.showText(hoverTooltip));
-        return footerLine.build();
+        return lines;
+    }
+
+    private void appendLinesWithHover(TextComponent.Builder pageBuilder, List<Component> lines, Component hover) {
+        for (Component line : lines) {
+            pageBuilder.append(line.hoverEvent(HoverEvent.showText(hover))).append(Component.text("\n"));
+        }
     }
 
     /**
@@ -557,10 +649,23 @@ public class BestiaryManager {
         String separator = plugin.getConfig().getString("bestiary.ui.separator", "───────────────");
 
         // 1. Титульный лист
-        Component titlePage = Component.text()
-                .append(Component.text(titleHeader + "\n", NamedTextColor.DARK_RED, TextDecoration.BOLD))
-                .append(Component.text(authorLabel, NamedTextColor.DARK_RED, TextDecoration.BOLD))
-                .append(Component.text(player.getName() + "\n", NamedTextColor.DARK_BLUE, TextDecoration.BOLD))
+        // Bold text wraps earlier than plain text (see WRAP_WIDTH/BOLD_WRAP_WIDTH notes near
+        // wrapText below): the default header "ПОЛЕВОЙ БЕСТИАРИЙ" (17 chars) and "Автор: " plus
+        // a long player name (Minecraft allows up to 16 characters) both silently wrapped mid
+        // word before this, so both are wrapped explicitly here instead.
+        List<String> titleHeaderLines = wrapText(titleHeader, BOLD_WRAP_WIDTH);
+        TextComponent.Builder titlePageBuilder = Component.text();
+        for (String l : titleHeaderLines) {
+            titlePageBuilder.append(Component.text(l + "\n", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+        }
+        if (authorLabel.length() + player.getName().length() <= BOLD_WRAP_WIDTH) {
+            titlePageBuilder.append(Component.text(authorLabel, NamedTextColor.DARK_RED, TextDecoration.BOLD))
+                    .append(Component.text(player.getName() + "\n", NamedTextColor.DARK_BLUE, TextDecoration.BOLD));
+        } else {
+            titlePageBuilder.append(Component.text(authorLabel + "\n", NamedTextColor.DARK_RED, TextDecoration.BOLD))
+                    .append(Component.text(player.getName() + "\n", NamedTextColor.DARK_BLUE, TextDecoration.BOLD));
+        }
+        Component titlePage = titlePageBuilder
                 .append(Component.text(titleSubtitle + "\n", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC))
                 .append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY))
                 .append(Component.text("Открыто видов: ", NamedTextColor.BLACK))
@@ -625,24 +730,48 @@ public class BestiaryManager {
                 String stageTitle = getMobStageHeader(speciesKills);
                 String stageText = getMobStageContent(mob, speciesKills);
 
-                // Оборачиваем текст по ширине ~19 символов (стандарт для книги)
-                List<String> contentLines = wrapText(stageText, 19);
+                List<String> contentLines = wrapText(stageText, WRAP_WIDTH);
+                List<String> subtitleLines = (familyDiscovered && subTitle != null && !subTitle.isEmpty())
+                        ? wrapText(subTitle, WRAP_WIDTH) : List.of();
+                List<String> stageTitleLines = wrapText(stageTitle, BOLD_WRAP_WIDTH);
+                List<Component> statsLines = buildStatsLines(speciesKills, recordBadge);
+                List<Component> footerLines = buildFooterLines(tier, speciesKills);
 
-                // Распределение текста по страницам (на 1-й странице до 5 строк текста, на продолжениях до 6 строк)
+                // Dynamic pagination: measure every element's REAL wrapped line count (title,
+                // subtitle, stats, stage header, footer) instead of assuming each is exactly
+                // one line, then fit as much body content as actually remains on each page.
+                // The old fixed "5 body lines on page 1 / 6 on continuations" budget silently
+                // overflowed the moment the stage header wrapped to 2 lines (true for every
+                // stage past the first) or the footer needed a resistance line (tier 2/3) -
+                // that's what made long entries get visually cut off near the bottom.
+                int singlePageHeader = titleLineCount(mobName, familyShort, familyDiscovered, false)
+                        + subtitleLines.size() + statsLines.size() + 1 /* separator */ + stageTitleLines.size();
+                int singlePageFooter = 1 /* separator */ + footerLines.size();
+                int singlePageBudget = Math.max(1, MAX_LINES_PER_PAGE - singlePageHeader - singlePageFooter);
+
                 List<List<String>> pagesContent = new ArrayList<>();
-                if (contentLines.size() <= 5) {
+                if (contentLines.size() <= singlePageBudget) {
                     pagesContent.add(new ArrayList<>(contentLines));
                 } else {
+                    int firstHeader = titleLineCount(mobName, familyShort, familyDiscovered, true)
+                            + subtitleLines.size() + statsLines.size() + 1 /* separator */ + stageTitleLines.size();
+                    int firstFooter = 1 /* separator */ + 1 /* continuation notice */;
+                    int firstBudget = Math.max(1, MAX_LINES_PER_PAGE - firstHeader - firstFooter);
+
+                    int contHeader = titleLineCount(mobName, familyShort, familyDiscovered, true) + 1 /* separator */;
+                    int contFooter = 1 /* separator */ + footerLines.size();
+                    int contBudget = Math.max(1, MAX_LINES_PER_PAGE - contHeader - contFooter);
+
                     int index = 0;
                     List<String> firstPage = new ArrayList<>();
-                    for (int i = 0; i < 5 && index < contentLines.size(); i++, index++) {
+                    for (int i = 0; i < firstBudget && index < contentLines.size(); i++, index++) {
                         firstPage.add(contentLines.get(index));
                     }
                     pagesContent.add(firstPage);
 
                     while (index < contentLines.size()) {
                         List<String> continuation = new ArrayList<>();
-                        for (int i = 0; i < 6 && index < contentLines.size(); i++, index++) {
+                        for (int i = 0; i < contBudget && index < contentLines.size(); i++, index++) {
                             continuation.add(contentLines.get(index));
                         }
                         if (!continuation.isEmpty()) {
@@ -656,36 +785,24 @@ public class BestiaryManager {
                     int pageNum = p + 1;
                     List<String> lines = pagesContent.get(p);
                     TextComponent.Builder pageBuilder = Component.text();
+                    List<Component> titleLines = buildTitleLines(mobName, familyShort, familyDiscovered, pageNum, totalMobPages);
 
                     if (pageNum == 1) {
                         // Страница 1: Шапка с названием, семейством, подзаголовком, убийствами
-                        TextComponent.Builder titleLine = Component.text()
-                                .append(Component.text(mobName, NamedTextColor.DARK_BLUE, TextDecoration.BOLD));
-                        if (familyDiscovered) {
-                            titleLine.append(Component.text(" (" + familyShort + ")", NamedTextColor.DARK_GRAY));
-                        }
-                        if (totalMobPages > 1) {
-                            titleLine.append(Component.text(" [" + pageNum + "/" + totalMobPages + "]", NamedTextColor.DARK_GRAY));
-                        }
-                        titleLine.append(Component.text("\n"));
-                        titleLine.hoverEvent(HoverEvent.showText(hoverTooltip));
-                        pageBuilder.append(titleLine);
+                        appendLinesWithHover(pageBuilder, titleLines, hoverTooltip);
 
-                        if (familyDiscovered && subTitle != null && !subTitle.isEmpty()) {
-                            pageBuilder.append(Component.text(subTitle + "\n", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
+                        if (!subtitleLines.isEmpty()) {
+                            for (String sl : subtitleLines) {
+                                pageBuilder.append(Component.text(sl + "\n", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
+                            }
                         }
 
-                        TextComponent.Builder statsLine = Component.text()
-                                .append(Component.text("Убито: ", NamedTextColor.BLACK))
-                                .append(Component.text(speciesKills + "", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
-                                .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
-                                .append(Component.text(recordBadge, NamedTextColor.GOLD, TextDecoration.BOLD))
-                                .append(Component.text(" [?]\n", NamedTextColor.DARK_AQUA, TextDecoration.BOLD));
-                        statsLine.hoverEvent(HoverEvent.showText(hoverTooltip));
-                        pageBuilder.append(statsLine);
+                        appendLinesWithHover(pageBuilder, statsLines, hoverTooltip);
 
                         pageBuilder.append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY));
-                        pageBuilder.append(Component.text(stageTitle + "\n", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+                        for (String stl : stageTitleLines) {
+                            pageBuilder.append(Component.text(stl + "\n", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+                        }
 
                         for (String l : lines) {
                             pageBuilder.append(Component.text(l + "\n", NamedTextColor.BLACK));
@@ -698,19 +815,11 @@ public class BestiaryManager {
                                     .hoverEvent(HoverEvent.showText(hoverTooltip));
                             pageBuilder.append(continuationNotice);
                         } else {
-                            Component footerLine = createFooterLine(tier, speciesKills, hoverTooltip);
-                            pageBuilder.append(footerLine);
+                            appendLinesWithHover(pageBuilder, footerLines, hoverTooltip);
                         }
                     } else {
                         // Страница продолжения: ОБЯЗАТЕЛЬНАЯ ВЕРХНЯЯ СТРОКА С ИМЕНЕМ МОБА
-                        TextComponent.Builder continuationHeader = Component.text()
-                                .append(Component.text(mobName, NamedTextColor.DARK_BLUE, TextDecoration.BOLD));
-                        if (familyDiscovered) {
-                            continuationHeader.append(Component.text(" (" + familyShort + ")", NamedTextColor.DARK_GRAY));
-                        }
-                        continuationHeader.append(Component.text(" [" + pageNum + "/" + totalMobPages + "]\n", NamedTextColor.DARK_GRAY));
-                        continuationHeader.hoverEvent(HoverEvent.showText(hoverTooltip));
-                        pageBuilder.append(continuationHeader);
+                        appendLinesWithHover(pageBuilder, titleLines, hoverTooltip);
 
                         pageBuilder.append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY));
 
@@ -720,8 +829,7 @@ public class BestiaryManager {
 
                         pageBuilder.append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY));
 
-                        Component footerLine = createFooterLine(tier, speciesKills, hoverTooltip);
-                        pageBuilder.append(footerLine);
+                        appendLinesWithHover(pageBuilder, footerLines, hoverTooltip);
                     }
 
                     pages.add(pageBuilder.build());
