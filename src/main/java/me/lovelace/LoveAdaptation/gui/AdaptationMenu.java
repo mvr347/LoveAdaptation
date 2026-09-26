@@ -90,21 +90,20 @@ public final class AdaptationMenu {
     }
 
     public void open(Player player) {
-        open(player, null);
+        open(player, false);
     }
 
     /**
-     * Открывает то же самое меню (/adaptation mainmenu), но с активной кнопкой "Назад" в
-     * BACK_SLOT, если режим mainmenu включён и итоговая команда возврата не пустая
-     * (см. {@link #resolveBackCommand()}) - иначе на месте кнопки остаётся стекло.
+     * Открывает меню со скрытым аргументом mainmenu (из хаб-меню сервера).
+     * Каждая кнопка проверяет свой параметр mainmenu (true - только в mainmenu,
+     * false - только в обычном режиме, не задано - в обоих).
      */
     public void openMainMenu(Player player) {
         if (!isMainMenuEnabled()) {
-            open(player);
+            open(player, false);
             return;
         }
-        String backCommand = resolveBackCommand();
-        open(player, (backCommand == null || backCommand.isBlank()) ? null : backCommand);
+        open(player, true);
     }
 
     /**
@@ -121,7 +120,7 @@ public final class AdaptationMenu {
         return plugin.getConfig().getString("gui.mainmenu_back_command", "");
     }
 
-    private void open(Player player, String backCommand) {
+    private void open(Player player, boolean isMainMenu) {
         AdaptationMenuHolder holder = new AdaptationMenuHolder();
         Inventory inventory = Bukkit.createInventory(holder, SIZE,
                 Utils.color(guiConfig.getString("menu.title", "&6Адаптации персонажа")));
@@ -146,11 +145,13 @@ public final class AdaptationMenu {
         occupied.add(configuredCloseSlot);
         occupied.addAll(ADAPTATION_SLOTS.keySet());
 
-        renderNotificationsButton(inventory, holder, occupied, backCommand, player);
-        renderInfoButton(inventory, holder, occupied, player);
-        renderBackButton(inventory, holder, occupied, backCommand, player);
-        renderCloseButton(inventory, holder, configuredCloseSlot, player);
-        renderCustomButtons(inventory, holder, occupied, player);
+        String backCommand = resolveBackCommand();
+
+        renderNotificationsButton(inventory, holder, occupied, player, isMainMenu);
+        renderInfoButton(inventory, holder, occupied, player, isMainMenu);
+        renderBackButton(inventory, holder, occupied, backCommand, player, isMainMenu);
+        renderCloseButton(inventory, holder, configuredCloseSlot, player, isMainMenu);
+        renderCustomButtons(inventory, holder, occupied, player, isMainMenu);
 
         player.openInventory(inventory);
     }
@@ -158,12 +159,17 @@ public final class AdaptationMenu {
     /**
      * Notifications - кнопка управления меню (Вк, gui_gen v2.1 RULE 4) этого меню.
      * По умолчанию слот 4. Переключает per-player уведомления адаптаций.
+     * Поддерживает mainmenu: true/false.
      */
     private void renderNotificationsButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
-                                            String backCommand, Player viewer) {
+                                            Player viewer, boolean isMainMenu) {
         boolean enabledInConfig = guiConfig.getBoolean("items.notifications.enabled", true);
         if (!enabledInConfig) {
             return; // Слот остаётся стеклом
+        }
+        Object mainmenu = guiConfig.get("items.notifications.mainmenu");
+        if (!shouldShowInMode(mainmenu, null, isMainMenu)) {
+            return;
         }
         int slot = guiConfig.getInt("items.notifications.slot", NOTIFICATIONS_SLOT);
         if (!isValidButtonSlot(slot)) {
@@ -195,7 +201,7 @@ public final class AdaptationMenu {
             PluginManager.getInstance().getAdaptationManager().toggleNotifications(viewer);
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (viewer.isOnline()) {
-                    open(viewer, backCommand);
+                    open(viewer, isMainMenu);
                 }
             });
         });
@@ -203,12 +209,17 @@ public final class AdaptationMenu {
 
     /**
      * Info - кнопка информации. По умолчанию слот 51 (footer-позиция "Д").
-     * Поддерживает настраиваемый slot и опциональную команду command при клике.
+     * Поддерживает настраиваемый slot, mainmenu и опциональную команду command при клике.
      */
-    private void renderInfoButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied, Player viewer) {
+    private void renderInfoButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
+                                   Player viewer, boolean isMainMenu) {
         boolean enabled = guiConfig.getBoolean("items.info.enabled", true);
         if (!enabled) {
             return; // слот остаётся стеклом
+        }
+        Object mainmenu = guiConfig.get("items.info.mainmenu");
+        if (!shouldShowInMode(mainmenu, null, isMainMenu)) {
+            return;
         }
         int slot = guiConfig.getInt("items.info.slot", INFO_SLOT);
         if (!isValidButtonSlot(slot)) {
@@ -240,16 +251,19 @@ public final class AdaptationMenu {
     }
 
     /**
-     * Back - кнопка Назад (по умолчанию слот 52). Активна только если mainmenu включён,
-     * команда возврата не пустая и items.back.enabled != false.
+     * Back - кнопка Назад (по умолчанию слот 52). По умолчанию mainmenu: true.
      */
     private void renderBackButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
-                                   String backCommand, Player viewer) {
-        if (!isMainMenuEnabled() || backCommand == null || backCommand.isBlank()) {
-            return;
-        }
+                                   String backCommand, Player viewer, boolean isMainMenu) {
         boolean enabled = guiConfig.getBoolean("items.back.enabled", true);
         if (!enabled) {
+            return;
+        }
+        Object mainmenu = guiConfig.get("items.back.mainmenu");
+        if (!shouldShowInMode(mainmenu, Boolean.TRUE, isMainMenu)) {
+            return;
+        }
+        if (backCommand == null || backCommand.isBlank()) {
             return;
         }
         int slot = guiConfig.getInt("items.back.slot", BACK_SLOT);
@@ -275,8 +289,18 @@ public final class AdaptationMenu {
         holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, backCommand));
     }
 
-    /** Close - кнопка Закрыть (по умолчанию слот 53). Всегда присутствует. */
-    private void renderCloseButton(Inventory inventory, AdaptationMenuHolder holder, int slot, Player viewer) {
+    /** Close - кнопка Закрыть (по умолчанию слот 53). Поддерживает mainmenu: true/false. */
+    private void renderCloseButton(Inventory inventory, AdaptationMenuHolder holder, int slot,
+                                    Player viewer, boolean isMainMenu) {
+        boolean enabled = guiConfig.getBoolean("items.close.enabled", true);
+        if (!enabled) {
+            return;
+        }
+        Object mainmenu = guiConfig.get("items.close.mainmenu");
+        if (!shouldShowInMode(mainmenu, null, isMainMenu)) {
+            return;
+        }
+
         String texture = guiConfig.getString("items.close.texture_base64", "");
         String material = guiConfig.getString("items.close.material", "");
         String name = guiConfig.getString("items.close.name", "&cЗакрыть");
@@ -297,14 +321,11 @@ public final class AdaptationMenu {
     }
 
     /**
-     * items.custom_buttons - произвольные дополнительные кнопки (owner request 2026-09-23: та же
-     * степень настраиваемости, что и behavior_menu.custom_buttons у LoveBehaivor). Каждая запись
-     * валидируется независимо: слот обязан попасть в зону, которую gui_gen v2.1 разрешает для
-     * кнопок в этой раскладке (см. {@link #isValidCustomButtonSlot}), не должен быть уже занят,
-     * и должна быть непустая команда. Некорректная запись логируется и пропускается - не ломает
-     * рендер остального меню и не падает.
+     * items.custom_buttons - произвольные дополнительные кнопки со своим слотом,
+     * командой и параметром mainmenu (true - только в mainmenu, false - только в обычном, не задано - в обоих).
      */
-    private void renderCustomButtons(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied, Player viewer) {
+    private void renderCustomButtons(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
+                                      Player viewer, boolean isMainMenu) {
         List<Map<?, ?>> entries = guiConfig.getMapList("items.custom_buttons");
         for (Map<?, ?> entry : entries) {
             Object rawSlot = entry.get("slot");
@@ -318,6 +339,10 @@ public final class AdaptationMenu {
             boolean enabled = !(entry.get("enabled") instanceof Boolean b) || b;
             if (!enabled) {
                 continue; // выключена явно - не резервируем слот, не логируем (это не ошибка)
+            }
+            Object mainmenu = entry.get("mainmenu");
+            if (!shouldShowInMode(mainmenu, null, isMainMenu)) {
+                continue;
             }
 
             if (!isValidCustomButtonSlot(slot)) {
@@ -349,6 +374,34 @@ public final class AdaptationMenu {
             inventory.setItem(slot, item);
             holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, command));
         }
+    }
+
+    /**
+     * Проверяет, должна ли кнопка отображаться в текущем режиме открытия (обычный vs mainmenu).
+     *
+     * @param configuredMode Значение параметра mainmenu из конфига (Boolean, String "true"/"false"/"both", либо null)
+     * @param defaultMode Режим по умолчанию для этой кнопки (true для Back, null/both для обычных кнопок)
+     * @param isMainMenu true если меню открыто со скрытым аргументом mainmenu/главменю
+     * @return true если кнопка должна быть отображена
+     */
+    private static boolean shouldShowInMode(Object configuredMode, Boolean defaultMode, boolean isMainMenu) {
+        Boolean mode = defaultMode;
+        if (configuredMode instanceof Boolean b) {
+            mode = b;
+        } else if (configuredMode instanceof String s) {
+            if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("only") || s.equalsIgnoreCase("mainmenu")) {
+                mode = Boolean.TRUE;
+            } else if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("normal")) {
+                mode = Boolean.FALSE;
+            } else if (s.equalsIgnoreCase("both") || s.equalsIgnoreCase("all")) {
+                mode = null;
+            }
+        }
+
+        if (mode == null) {
+            return true; // both modes
+        }
+        return mode ? isMainMenu : !isMainMenu;
     }
 
     /** Выполняет command как сам игрок (тот же паттерн, что и gui.mainmenu_back_command раньше) -

@@ -88,4 +88,8 @@ public final class GuiConfig {
     public boolean isSet(String path) {
         return gui != null && gui.isSet(path);
     }
+
+    public Object get(String path) {
+        return gui != null ? gui.get(path) : null;
+    }
 }
