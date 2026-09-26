@@ -147,7 +147,9 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_header", "&8========== &6LoveAdaptation Помощь &8==========")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_menu", "&6/adaptation menu &7(или &6меню&7) &7- Открыть меню адаптаций и посмотреть прогресс")));
-        sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7(или &6главменю&7) &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
+        if (plugin.getAdaptationMenu().isMainMenuEnabled()) {
+            sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_mainmenu", "&6/adaptation mainmenu &7(или &6главменю&7) &7- То же меню с кнопкой \"Назад\" (для хаб-меню сервера)")));
+        }
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_info", "&6/adaptation info &7(или &6инфо&7) &7[игрок] &7- Показать прогресс адаптаций")));
         sender.sendMessage(Utils.color(plugin.getConfig().getString("lang.help_notifications", "&6/adaptation notifications &7(или &6уведомления&7) &7- Вкл/выкл уведомлений адаптаций")));
         if (sender.hasPermission("loveadaptation.admin")) {
@@ -160,7 +162,8 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String s : Arrays.asList("menu", "меню", "mainmenu", "главменю", "info", "инфо", "notifications", "уведомления", "help", "помощь")) {
+            // mainmenu и главменю намеренно исключены из автодополнения (используются для хаб-меню)
+            for (String s : Arrays.asList("menu", "меню", "info", "инфо", "notifications", "уведомления", "help", "помощь")) {
                 if (s.startsWith(args[0].toLowerCase())) completions.add(s);
             }
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("инфо"))) {

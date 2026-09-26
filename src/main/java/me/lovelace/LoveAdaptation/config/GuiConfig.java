@@ -80,4 +80,12 @@ public final class GuiConfig {
     public List<Map<?, ?>> getMapList(String path) {
         return gui.getMapList(path);
     }
+
+    public boolean contains(String path) {
+        return gui != null && gui.contains(path);
+    }
+
+    public boolean isSet(String path) {
+        return gui != null && gui.isSet(path);
+    }
 }

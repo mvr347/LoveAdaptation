@@ -48,23 +48,19 @@ public final class AdaptationMenu {
     public static final int INFO_SLOT = 51;
     public static final int BACK_SLOT = 52;
     public static final int CLOSE_SLOT = 53;
-    // Единственная сегодня кнопка управления (Вк) этого меню - gui_gen v2.1 RULE 4: 1 Вк
-    // центрируется на слоте 4 или 5 диапазона 2-7. Слот 4 сюда не входит в BORDER_SLOTS ниже
-    // (как и INFO_SLOT/BACK_SLOT) - рендерится динамически в renderNotificationsButton().
     public static final int NOTIFICATIONS_SLOT = 4;
 
     private static final String EMPTY_NAME = " ";
     private static final String FILLER_MATERIAL_DEFAULT = "GRAY_STAINED_GLASS_PANE";
 
-    // Боковые стенки рабочей зоны (18, 26, 27, 35, 36, 44) сюда не входят - по
-    // gui-gen-5 (RULE 6) рабочая зона никогда не заполняется стеклом, только
-    // контентом или пустотой, даже по бокам. INFO_SLOT/BACK_SLOT тоже сюда не
-    // входят - это динамические кнопки (RULE 2, п.5): стекло там появляется
-    // только когда кнопка неактивна/выключена, обрабатывается отдельно в open().
-    private static final int[] BORDER_SLOTS = {
-        1, 2, 3, 5, 6, 7, 8,
+    // Рамка Header/Footer по стандарту gui_gen v2.1: верхний ряд 1-8, Row1 9-17
+    // и нижний футер 45-52 заполняются стеклом по умолчанию. Кнопки (уведомления,
+    // инфо, назад, кастомные) заменяют стекло на своих слотах при рендере.
+    // Рабочая зона 18-44 (в т.ч. стенки) стеклом не заливается.
+    private static final int[] FRAME_GLASS_SLOTS = {
+        1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
-        45, 46, 47, 48, 49, 50
+        45, 46, 47, 48, 49, 50, 51, 52
     };
 
     private static final Map<Integer, AdaptationType> ADAPTATION_SLOTS = new LinkedHashMap<>();
@@ -89,17 +85,24 @@ public final class AdaptationMenu {
         return ADAPTATION_SLOTS.get(slot);
     }
 
+    public boolean isMainMenuEnabled() {
+        return guiConfig.getBoolean("menu.mainmenu", guiConfig.getBoolean("mainmenu", true));
+    }
+
     public void open(Player player) {
         open(player, null);
     }
 
     /**
      * Открывает то же самое меню (/adaptation mainmenu), но с активной кнопкой "Назад" в
-     * BACK_SLOT, если итоговая команда возврата не пустая (см. {@link #resolveBackCommand()}) -
-     * иначе на месте кнопки остаётся стекло (RULE 2, п.5: динамический элемент не может
-     * оставлять пустой слот).
+     * BACK_SLOT, если режим mainmenu включён и итоговая команда возврата не пустая
+     * (см. {@link #resolveBackCommand()}) - иначе на месте кнопки остаётся стекло.
      */
     public void openMainMenu(Player player) {
+        if (!isMainMenuEnabled()) {
+            open(player);
+            return;
+        }
         String backCommand = resolveBackCommand();
         open(player, (backCommand == null || backCommand.isBlank()) ? null : backCommand);
     }
@@ -126,7 +129,7 @@ public final class AdaptationMenu {
 
         String fillerMaterialName = guiConfig.getString("menu.filler_material", FILLER_MATERIAL_DEFAULT);
         ItemStack border = fillerItem(fillerMaterialName);
-        for (int slot : BORDER_SLOTS) {
+        for (int slot : FRAME_GLASS_SLOTS) {
             inventory.setItem(slot, border);
         }
 
@@ -136,38 +139,43 @@ public final class AdaptationMenu {
         }
 
         // Слоты, уже занятые фиксированной раскладкой независимо от конфигурируемых кнопок ниже -
-        // голова, все слоты адаптаций и Close (Close регистрируется отдельно ниже, но слот
-        // резервируем сразу, чтобы custom_buttons не могли на него претендовать).
+        // голова, все слоты адаптаций и Close.
         Set<Integer> occupied = new HashSet<>();
         occupied.add(PLAYER_HEAD_SLOT);
-        occupied.add(CLOSE_SLOT);
+        int configuredCloseSlot = guiConfig.getInt("items.close.slot", CLOSE_SLOT);
+        occupied.add(configuredCloseSlot);
         occupied.addAll(ADAPTATION_SLOTS.keySet());
 
-        renderNotificationsButton(inventory, holder, occupied, border, backCommand, player);
-        renderInfoButton(inventory, holder, occupied, border);
-        renderBackButton(inventory, holder, occupied, backCommand, border, player);
-        renderCloseButton(inventory, holder, player);
+        renderNotificationsButton(inventory, holder, occupied, backCommand, player);
+        renderInfoButton(inventory, holder, occupied, player);
+        renderBackButton(inventory, holder, occupied, backCommand, player);
+        renderCloseButton(inventory, holder, configuredCloseSlot, player);
         renderCustomButtons(inventory, holder, occupied, player);
 
         player.openInventory(inventory);
     }
 
     /**
-     * Notifications - единственная сегодня кнопка управления (Вк, gui_gen v2.1 RULE 4) этого
-     * меню, слот 4 (центр диапазона 2-7 для одной Вк). Переключает per-player уведомления
-     * адаптаций (title/actionbar/sound из AdaptationManager) - клик тут же перерисовывает то же
-     * самое меню в тех же условиях (тот же backCommand), а не закрывает инвентарь, чтобы игрок
-     * сразу увидел новое состояние. Может быть выключена в gui.yml (items.notifications.enabled) -
-     * тогда слот остаётся стеклом (RULE 2, п.5).
+     * Notifications - кнопка управления меню (Вк, gui_gen v2.1 RULE 4) этого меню.
+     * По умолчанию слот 4. Переключает per-player уведомления адаптаций.
      */
     private void renderNotificationsButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
-                                            ItemStack border, String backCommand, Player viewer) {
+                                            String backCommand, Player viewer) {
         boolean enabledInConfig = guiConfig.getBoolean("items.notifications.enabled", true);
         if (!enabledInConfig) {
-            inventory.setItem(NOTIFICATIONS_SLOT, border);
+            return; // Слот остаётся стеклом
+        }
+        int slot = guiConfig.getInt("items.notifications.slot", NOTIFICATIONS_SLOT);
+        if (!isValidButtonSlot(slot)) {
+            plugin.getLogger().warning("gui.yml: items.notifications.slot=" + slot
+                    + " вне диапазона инвентаря (0-" + (SIZE - 1) + ") - кнопка пропущена.");
             return;
         }
-        occupied.add(NOTIFICATIONS_SLOT);
+        if (!occupied.add(slot)) {
+            plugin.getLogger().warning("gui.yml: items.notifications.slot=" + slot
+                    + " уже занят другим элементом меню - кнопка уведомлений пропущена.");
+            return;
+        }
 
         PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(viewer.getUniqueId());
         boolean notificationsOn = data == null || data.isNotificationsEnabled();
@@ -182,12 +190,9 @@ public final class AdaptationMenu {
         }
 
         ItemStack item = GuiItemBuilder.resolveIcon(texture, material, null, name, lore);
-        inventory.setItem(NOTIFICATIONS_SLOT, item);
-        holder.registerAction(NOTIFICATIONS_SLOT, () -> {
+        inventory.setItem(slot, item);
+        holder.registerAction(slot, () -> {
             PluginManager.getInstance().getAdaptationManager().toggleNotifications(viewer);
-            // Deferred a tick, same pattern as dispatchConfiguredCommand() below - reopening the
-            // inventory synchronously from inside InventoryClickEvent handling can race Bukkit's
-            // own post-click inventory update.
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (viewer.isOnline()) {
                     open(viewer, backCommand);
@@ -197,18 +202,27 @@ public final class AdaptationMenu {
     }
 
     /**
-     * Info - единственная сегодня кнопка footer-позиции "Д" (слот 51 по стандарту gui_gen v2.1).
-     * С 2026-09-23 может быть выключена в gui.yml (items.info.enabled) - слот тогда остаётся
-     * стеклом, как и любая неактивная динамическая кнопка (RULE 2, п.5). Позиция "Д" фиксирована
-     * стандартом (не двигается), в отличие от items.custom_buttons ниже.
+     * Info - кнопка информации. По умолчанию слот 51 (footer-позиция "Д").
+     * Поддерживает настраиваемый slot и опциональную команду command при клике.
      */
-    private void renderInfoButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied, ItemStack border) {
+    private void renderInfoButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied, Player viewer) {
         boolean enabled = guiConfig.getBoolean("items.info.enabled", true);
         if (!enabled) {
-            inventory.setItem(INFO_SLOT, border);
-            return; // выключена явно в gui.yml - слот остаётся стеклом
+            return; // слот остаётся стеклом
         }
-        occupied.add(INFO_SLOT);
+        int slot = guiConfig.getInt("items.info.slot", INFO_SLOT);
+        if (!isValidButtonSlot(slot)) {
+            plugin.getLogger().warning("gui.yml: items.info.slot=" + slot
+                    + " вне диапазона инвентаря (0-" + (SIZE - 1) + ") - кнопка Информация пропущена.");
+            return;
+        }
+        if (!occupied.add(slot)) {
+            if (guiConfig.contains("items.info.slot")) {
+                plugin.getLogger().warning("gui.yml: items.info.slot=" + slot
+                        + " уже занят другим элементом меню - кнопка Информация пропущена.");
+            }
+            return;
+        }
 
         String texture = guiConfig.getString("items.info.texture_base64", "");
         String material = guiConfig.getString("items.info.material", "");
@@ -217,25 +231,38 @@ public final class AdaptationMenu {
 
         ItemStack item = GuiItemBuilder.resolveIcon(texture, material,
                 HeadsConfig.get("info", HeadTextures.BASE_INFO_FALLBACK), name, lore);
-        inventory.setItem(INFO_SLOT, item);
-        // Info сегодня не привязана к команде - клик по ней исторически ничего не делает
-        // (чисто информационная подсказка в лоре), поэтому действие не регистрируется:
-        // GuiClickListener просто не найдёт для слота 51 зарегистрированного действия.
+        inventory.setItem(slot, item);
+
+        String command = guiConfig.getString("items.info.command", "");
+        if (command != null && !command.isBlank()) {
+            holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, command));
+        }
     }
 
     /**
-     * Back - footer-позиция 7 (слот 52), не двигается; активна только в /adaptation mainmenu с
-     * непустой итоговой командой возврата (см. {@link #resolveBackCommand()}) и не выключена
-     * явно через items.back.enabled.
+     * Back - кнопка Назад (по умолчанию слот 52). Активна только если mainmenu включён,
+     * команда возврата не пустая и items.back.enabled != false.
      */
     private void renderBackButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
-                                   String backCommand, ItemStack border, Player viewer) {
-        boolean enabled = guiConfig.getBoolean("items.back.enabled", true);
-        if (backCommand == null || backCommand.isBlank() || !enabled) {
-            inventory.setItem(BACK_SLOT, border);
-            return; // не /adaptation mainmenu, команда не настроена, либо выключена явно - слот остаётся стеклом
+                                   String backCommand, Player viewer) {
+        if (!isMainMenuEnabled() || backCommand == null || backCommand.isBlank()) {
+            return;
         }
-        occupied.add(BACK_SLOT);
+        boolean enabled = guiConfig.getBoolean("items.back.enabled", true);
+        if (!enabled) {
+            return;
+        }
+        int slot = guiConfig.getInt("items.back.slot", BACK_SLOT);
+        if (!isValidButtonSlot(slot)) {
+            plugin.getLogger().warning("gui.yml: items.back.slot=" + slot
+                    + " вне диапазона инвентаря (0-" + (SIZE - 1) + ") - кнопка Назад пропущена.");
+            return;
+        }
+        if (!occupied.add(slot)) {
+            plugin.getLogger().warning("gui.yml: items.back.slot=" + slot
+                    + " уже занят другим элементом меню - кнопка Назад пропущена.");
+            return;
+        }
 
         String texture = guiConfig.getString("items.back.texture_base64", "");
         String material = guiConfig.getString("items.back.material", "");
@@ -244,13 +271,12 @@ public final class AdaptationMenu {
 
         ItemStack item = GuiItemBuilder.resolveIcon(texture, material,
                 HeadsConfig.get("back", HeadTextures.BASE_BACK_FALLBACK), name, lore);
-        inventory.setItem(BACK_SLOT, item);
-        holder.registerAction(BACK_SLOT, () -> dispatchConfiguredCommand(viewer, backCommand));
+        inventory.setItem(slot, item);
+        holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, backCommand));
     }
 
-    /** Close - footer-позиция 8 (слот 53). Всегда присутствует, никогда не выключается и не
-     * двигается (gui_gen v2.1: позиция 8/Close всегда на месте, без исключений). */
-    private void renderCloseButton(Inventory inventory, AdaptationMenuHolder holder, Player viewer) {
+    /** Close - кнопка Закрыть (по умолчанию слот 53). Всегда присутствует. */
+    private void renderCloseButton(Inventory inventory, AdaptationMenuHolder holder, int slot, Player viewer) {
         String texture = guiConfig.getString("items.close.texture_base64", "");
         String material = guiConfig.getString("items.close.material", "");
         String name = guiConfig.getString("items.close.name", "&cЗакрыть");
@@ -258,8 +284,16 @@ public final class AdaptationMenu {
 
         ItemStack item = GuiItemBuilder.resolveIcon(texture, material,
                 HeadsConfig.get("close", HeadTextures.BASE_CLOSE_FALLBACK), name, lore);
-        inventory.setItem(CLOSE_SLOT, item);
-        holder.registerAction(CLOSE_SLOT, viewer::closeInventory);
+        inventory.setItem(slot, item);
+
+        String command = guiConfig.getString("items.close.command", "");
+        if (command != null && !command.isBlank()) {
+            holder.registerAction(slot, () -> {
+                dispatchConfiguredCommand(viewer, command);
+            });
+        } else {
+            holder.registerAction(slot, viewer::closeInventory);
+        }
     }
 
     /**
@@ -288,14 +322,12 @@ public final class AdaptationMenu {
 
             if (!isValidCustomButtonSlot(slot)) {
                 plugin.getLogger().warning("gui.yml: items.custom_buttons слот " + slot
-                        + " вне зон, разрешённых стандартом gui_gen v2.1 для этого меню "
-                        + "(зона управления 2-7, боковые стенки рабочей зоны, Row1, слот Close и т.п.) "
-                        + "- кнопка пропущена.");
+                        + " вне диапазона инвентаря (0-" + (SIZE - 1) + ") - кнопка пропущена.");
                 continue;
             }
             if (!occupied.add(slot)) {
                 plugin.getLogger().warning("gui.yml: items.custom_buttons слот " + slot
-                        + " уже занят другим элементом этого меню - кнопка пропущена.");
+                        + " уже занят другой кнопкой этого меню - кнопка пропущена.");
                 continue;
             }
 
@@ -320,59 +352,36 @@ public final class AdaptationMenu {
     }
 
     /** Выполняет command как сам игрок (тот же паттерн, что и gui.mainmenu_back_command раньше) -
-     * ведущий "/" отрезается (частая опечатка в конфиге, Bukkit ожидает командную строку без
-     * него), закрытие инвентаря и сам диспатч разнесены на следующий тик, чтобы не мешать
-     * обработке текущего InventoryClickEvent. Если сервер не распознал команду (частая причина -
-     * опечатка в gui.yml/config.yml или плагин, дающий эту команду, не установлен), это пишется
-     * в лог - раньше такая ошибка была полностью тихой и владелец сервера не мог понять, почему
-     * кнопка "ничего не делает". */
+     * ведущий "/" отрезается, закрытие инвентаря и сам диспатч разнесены на следующий тик, чтобы не мешать
+     * обработке текущего InventoryClickEvent. */
     private void dispatchConfiguredCommand(Player viewer, String rawCommand) {
-        String command = rawCommand.startsWith("/") ? rawCommand.substring(1) : rawCommand;
+        String substituted = rawCommand.replace("%player%", viewer.getName()).replace("{player}", viewer.getName());
+        String command = substituted.startsWith("/") ? substituted.substring(1) : substituted;
+        final String finalCommand = command;
         viewer.closeInventory();
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!viewer.isOnline()) {
                 return;
             }
-            boolean recognized = viewer.performCommand(command);
+            boolean recognized = viewer.performCommand(finalCommand);
             if (!recognized) {
-                plugin.getLogger().warning("AdaptationMenu: команда \"" + command + "\", настроенная для кнопки "
+                plugin.getLogger().warning("AdaptationMenu: команда \"" + finalCommand + "\", настроенная для кнопки "
                         + "GUI, не распознана сервером для игрока " + viewer.getName() + " - проверьте gui.yml/"
-                        + "config.yml (gui.mainmenu_back_command) на опечатку или отсутствующий плагин.");
+                        + "config.yml на опечатку или отсутствующий плагин.");
             }
         });
     }
 
-    /** Зона кнопок управления по gui_gen v2.1 - единственная зона Header'а, куда может попасть
-     * конфигурируемая кнопка; слоты 0,1,8 всегда голова/рамка, 9-17 (Row1) всегда стекло. */
     private static boolean isValidControlSlot(int slot) {
-        return slot >= 2 && slot <= 7;
+        return slot >= 0 && slot < SIZE;
     }
 
-    /**
-     * Любой слот, который items.custom_buttons может легально занять в этой 54-слотовой
-     * раскладке gui_gen v2.1: зона управления Header (2-7), не-боковая ячейка рабочей зоны
-     * (18-44, кроме стенок 18,26,27,35,36,44 - они всегда пустые; занятость слотами адаптаций
-     * 19-25 проверяется отдельно через occupied), либо footer-позиции 6 ("Д"/Info) и 7 ("Назад") -
-     * свободны, если соответствующая встроенная кнопка в этом рендере не активна (тоже
-     * отражено в occupied). Row1 (9-17), рамки Header (0,1,8), стеклянные footer-позиции 1-5
-     * (45-49) и слот Close (53) - никогда не легальны ни для одной кнопки.
-     */
+    private static boolean isValidButtonSlot(int slot) {
+        return slot >= 0 && slot < SIZE;
+    }
+
     private static boolean isValidCustomButtonSlot(int slot) {
-        if (slot < 0 || slot >= SIZE) {
-            return false;
-        }
-        if (slot <= 8) {
-            return isValidControlSlot(slot);
-        }
-        if (slot <= 17) {
-            return false; // Row1
-        }
-        if (slot <= 44) {
-            int positionInRow = (slot - 18) % 9;
-            return positionInRow != 0 && positionInRow != 8;
-        }
-        int footerLocal = slot - 45;
-        return footerLocal == 6 || footerLocal == 7;
+        return slot >= 0 && slot < SIZE;
     }
 
     private static List<String> toStringList(Object raw) {
