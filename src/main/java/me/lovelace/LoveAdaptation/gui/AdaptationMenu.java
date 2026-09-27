@@ -58,9 +58,9 @@ public final class AdaptationMenu {
     // инфо, назад, кастомные) заменяют стекло на своих слотах при рендере.
     // Рабочая зона 18-44 (в т.ч. стенки) стеклом не заливается.
     private static final int[] FRAME_GLASS_SLOTS = {
-        1, 2, 3, 4, 5, 6, 7, 8,
+        0, 1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
-        45, 46, 47, 48, 49, 50, 51, 52
+        45, 46, 47, 48, 49, 50, 51, 52, 53
     };
 
     private static final Map<Integer, AdaptationType> ADAPTATION_SLOTS = new LinkedHashMap<>();
@@ -132,18 +132,24 @@ public final class AdaptationMenu {
             inventory.setItem(slot, border);
         }
 
-        inventory.setItem(PLAYER_HEAD_SLOT, buildPlayerHead(player));
+        Set<Integer> occupied = new HashSet<>();
+
+        // Слот 0: голова игрока
+        boolean playerHeadEnabled = guiConfig.getBoolean("items.player_head.enabled", true);
+        Object playerHeadMainMenu = guiConfig.get("items.player_head.mainmenu");
+        int playerHeadSlot = guiConfig.getInt("items.player_head.slot", PLAYER_HEAD_SLOT);
+        if (playerHeadEnabled && shouldShowInMode(playerHeadMainMenu, null, isMainMenu) && isValidButtonSlot(playerHeadSlot)) {
+            inventory.setItem(playerHeadSlot, buildPlayerHead(player));
+            occupied.add(playerHeadSlot);
+        }
+
         for (Map.Entry<Integer, AdaptationType> entry : ADAPTATION_SLOTS.entrySet()) {
             inventory.setItem(entry.getKey(), buildAdaptationItem(player, entry.getValue()));
         }
+        occupied.addAll(ADAPTATION_SLOTS.keySet());
 
-        // Слоты, уже занятые фиксированной раскладкой независимо от конфигурируемых кнопок ниже -
-        // голова, все слоты адаптаций и Close.
-        Set<Integer> occupied = new HashSet<>();
-        occupied.add(PLAYER_HEAD_SLOT);
         int configuredCloseSlot = guiConfig.getInt("items.close.slot", CLOSE_SLOT);
         occupied.add(configuredCloseSlot);
-        occupied.addAll(ADAPTATION_SLOTS.keySet());
 
         String backCommand = resolveBackCommand();
 
@@ -185,17 +191,26 @@ public final class AdaptationMenu {
 
         PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(viewer.getUniqueId());
         boolean notificationsOn = data == null || data.isNotificationsEnabled();
+        String stateStr = notificationsOn ? "&aВКЛ" : "&cВЫКЛ";
 
-        String texture = guiConfig.getString("items.notifications.texture_base64", "");
-        String material = guiConfig.getString("items.notifications.material", notificationsOn ? "BELL" : "GRAY_DYE");
-        String name = guiConfig.getString("items.notifications.name",
-                notificationsOn ? "&aУведомления: &fВКЛ" : "&cУведомления: &fВЫКЛ");
-        List<String> lore = guiConfig.getStringList("items.notifications.lore");
-        if (lore.isEmpty()) {
-            lore = List.of("", "&7Титры/сообщения/звуки", "&7о прокачке и деградации адаптаций.", "", "&aЛКМ &7- переключить");
+        String defaultTex = HeadsConfig.get("notifications", HeadTextures.BASE_NOTIFICATIONS_FALLBACK);
+        String texture = notificationsOn
+                ? guiConfig.getString("items.notifications.texture_base64_on", guiConfig.getString("items.notifications.texture_base64", defaultTex))
+                : guiConfig.getString("items.notifications.texture_base64_off", guiConfig.getString("items.notifications.texture_base64", defaultTex));
+
+        String material = guiConfig.getString("items.notifications.material", "");
+        String rawName = guiConfig.getString("items.notifications.name", "&eУведомления: %state%");
+        String name = rawName.replace("%state%", stateStr);
+        List<String> rawLore = guiConfig.getStringList("items.notifications.lore");
+        if (rawLore.isEmpty()) {
+            rawLore = List.of("", "&7Статус: %state%", "", "&7Титры, сообщения и звуки", "&7о прокачке и деградации адаптаций.", "", "&eЛКМ &7— переключить");
+        }
+        List<String> lore = new ArrayList<>();
+        for (String line : rawLore) {
+            lore.add(line.replace("%state%", stateStr));
         }
 
-        ItemStack item = GuiItemBuilder.resolveIcon(texture, material, null, name, lore);
+        ItemStack item = GuiItemBuilder.resolveIcon(texture, material, defaultTex, name, lore);
         inventory.setItem(slot, item);
         holder.registerAction(slot, () -> {
             PluginManager.getInstance().getAdaptationManager().toggleNotifications(viewer);
@@ -230,7 +245,7 @@ public final class AdaptationMenu {
         if (!occupied.add(slot)) {
             if (guiConfig.contains("items.info.slot")) {
                 plugin.getLogger().warning("gui.yml: items.info.slot=" + slot
-                        + " уже занят другим элементом меню - кнопка Информация пропущена.");
+                    + " уже занят другим элементом меню - кнопка Информация пропущена.");
             }
             return;
         }
@@ -263,9 +278,6 @@ public final class AdaptationMenu {
         if (!shouldShowInMode(mainmenu, Boolean.TRUE, isMainMenu)) {
             return;
         }
-        if (backCommand == null || backCommand.isBlank()) {
-            return;
-        }
         int slot = guiConfig.getInt("items.back.slot", BACK_SLOT);
         if (!isValidButtonSlot(slot)) {
             plugin.getLogger().warning("gui.yml: items.back.slot=" + slot
@@ -286,7 +298,17 @@ public final class AdaptationMenu {
         ItemStack item = GuiItemBuilder.resolveIcon(texture, material,
                 HeadsConfig.get("back", HeadTextures.BASE_BACK_FALLBACK), name, lore);
         inventory.setItem(slot, item);
-        holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, backCommand));
+
+        String command = guiConfig.getString("items.back.command", "");
+        if (command == null || command.isBlank()) {
+            command = backCommand;
+        }
+        final String effectiveCommand = command;
+        if (effectiveCommand != null && !effectiveCommand.isBlank()) {
+            holder.registerAction(slot, () -> dispatchConfiguredCommand(viewer, effectiveCommand));
+        } else {
+            holder.registerAction(slot, viewer::closeInventory);
+        }
     }
 
     /** Close - кнопка Закрыть (по умолчанию слот 53). Поддерживает mainmenu: true/false. */
@@ -480,7 +502,8 @@ public final class AdaptationMenu {
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         if (meta != null) {
             meta.setOwningPlayer(player);
-            meta.setDisplayName(Utils.color("&f" + player.getName()));
+            String configuredName = guiConfig.getString("items.player_head.name", "&f%player%");
+            meta.setDisplayName(Utils.color(configuredName.replace("%player%", player.getName())));
             meta.setLore(Utils.color(lore));
             head.setItemMeta(meta);
         }

@@ -1,129 +1,124 @@
-# Настройки нативного GUI-меню адаптаций (/loveadaptation menu). Иконки и текст
-# самих адаптаций берутся из config.yml (adaptations.<type>.*) — их набор и
-# порядок в меню не настраивается тут, только материал/текстура/текст уже
-# существующих служебных кнопок (Info/Back/Close) и полностью новые кнопки
-# сверх них (items.custom_buttons).
+# ==============================================================================
+#                      LoveAdaptation — Меню Адаптаций
+# ==============================================================================
 #
-# Раскладка (размер инвентаря 54, слоты головы/адаптаций/Close) фиксирована в
-# коде — стандарт gui_gen v2.1 требует этого для головы (слот 0) и Close
-# (слот 53, всегда присутствует, никогда не выключается и не двигается).
+# Раскладка меню (размер 54 слота):
+#  - Header (слоты 0-8):
+#      Слот 0: Голова игрока (player_head)
+#      Слоты 1-3, 5-8: Стекло (GRAY_STAINED_GLASS_PANE)
+#      Слот 4: Кнопка управления (Вк) — переключение уведомлений (notifications)
+#  - Row1 (слоты 9-17):
+#      Всегда 100% стекло (RULE 5)
+#  - Рабочая зона (слоты 18-44):
+#      Боковые стенки 18, 26, 27, 35, 36, 44 — строго ПУСТО (AIR, никакого стекла!)
+#      Слоты 19-25: Иконки 7 адаптаций (Дельфин, Адепт огня, Зрение во мраке,
+#                   Падальщик, Страж Бездны, Боевой закал, Странник)
+#      Слоты 28-34, 37-43: Свободная рабочая зона (для custom_buttons)
+#  - Footer (слоты 45-53):
+#      Слоты 45-50: Стекло (GRAY_STAINED_GLASS_PANE)
+#      Слот 51: Информация (info, позиция 6 / "Д")
+#      Слот 52: Назад (back, позиция 7 / Back) — активно в режиме mainmenu
+#      Слот 53: Закрыть (close, позиция 8 / Close)
 #
-# Добавлено 2026-09-23 по запросу владельца ("довести GUI до той же степени
-# настраиваемости, что и у LoveBehaivor — снимать/добавлять базовые кнопки,
-# двигать их, добавлять свои со своими текстурами и командами"):
-# - items.info.enabled / items.back.enabled — можно выключить кнопку, слот
-#   тогда остаётся стеклом (RULE 2 п.5 gui_gen v2.1 — динамическая кнопка без
-#   функции не оставляет пустоту).
-# - items.back.command — переопределяет gui.mainmenu_back_command из
-#   config.yml, если задан непустым (напр. "dmenu open hub" — целевая команда
-#   открытия хаб-меню DeluxeMenus, без ведущего "/"). Старый ключ по-прежнему
-#   работает без изменений, если это поле не задано.
-# - items.custom_buttons — список полностью новых кнопок сверх встроенных.
-#   Каждая запись обязана иметь непустые slot и command; slot обязан попасть в
-#   зону, разрешённую стандартом gui_gen v2.1 для кнопок в этом меню (зона
-#   управления Header 2-7, рабочая зона кроме боковых стенок 18/26/27/35/36/44
-#   и уже занятых слотов адаптаций 19-25, footer-позиции 6/7 — не Row1 9-17,
-#   не слот Close 53). Некорректная или занятая другим элементом запись
-#   пропускается с предупреждением в лог, а не ломает остальное меню.
-#
-# material vs texture_base64 (info/back/close и custom_buttons): texture_base64
-# — "сырой" base64 текстуры головы (формат HeadDatabase). material — либо
-# обычное имя Material (напр. NETHER_STAR) для предмета без головы, либо
-# "basehead-<base64>" (тот же base64, что и в texture_base64) — этот синтаксис
-# специально совпадает с материалом "basehead-<base64>" стандарта gui_gen v2.1,
-# чтобы конфиг был переносим между меню/плагинами экосистемы. Если задано
-# texture_base64 — используется оно, material игнорируется (обратная
-# совместимость со старыми gui.yml, где material не было вовсе).
+# Параметры кнопок:
+#  - enabled: true/false — включена ли кнопка (при false слот заполняется стеклом)
+#  - slot: 0-53 — целевой слот в инвентаре
+#  - mainmenu: both / true / false — режим отображения:
+#      both: во всех режимах (и /adaptation menu, и /adaptation mainmenu)
+#      true: только в режиме mainmenu (/adaptation mainmenu — из хаб-меню сервера)
+#      false: только в обычном режиме (/adaptation menu)
+#  - command: команда игрока без ведущего "/" (напр. "dm open hub")
+#  - material: Material или PLAYER_HEAD
+#  - texture_base64: Base64-текстура кастомной головы (HeadDatabase / minecraft-heads)
+# ==============================================================================
 
 menu:
   title: "&6Адаптации персонажа"
-  # Материал стекла-рамки Header/Footer (RULE 2 gui_gen v2.1). Добавлено 2026-09-23.
   filler_material: "GRAY_STAINED_GLASS_PANE"
-  # Включает режим mainmenu (открытие меню с кнопкой 'Назад' через /loveadaptation mainmenu).
-  # При false — команда /loveadaptation mainmenu открывает обычное меню без кнопки 'Назад'.
-  # Добавлено 2026-09-26.
+  # Включает режим mainmenu (открытие с кнопкой 'Назад' через /loveadaptation mainmenu)
   mainmenu: true
 
 items:
-  notifications:
-    # Добавлено 2026-09-25: кнопка управления меню (Вк, gui_gen v2.1 RULE 4 — единственная
-    # Вк этого меню, центрируется на слоте 4 диапазона 2-7). Переключает per-player
-    # уведомления адаптаций (title/actionbar/sound из notifications.* в config.yml) без
-    # выхода из меню. enabled=false убирает кнопку - слот остаётся стеклом (RULE 2 п.5).
+  # Голова игрока (слот 0 в Header)
+  player_head:
     enabled: true
-    # slot: 4 # Слот кнопки (по умолчанию 4 в зоне Header 2-7)
-    # mainmenu: true/false # true - ТОЛЬКО в mainmenu (/adaptation mainmenu), false - ТОЛЬКО в обычном /adaptation, не указано - в обоих
-    # material / texture_base64 переопределяют иконку (по умолчанию BELL/GRAY_DYE в коде
-    # в зависимости от текущего состояния игрока), если заданы непустыми.
-    # material: ""
-    # texture_base64: ""
-    # name / lore не заданы — код сам подставляет текст под текущее состояние
-    # (ВКЛ/ВЫКЛ), чтобы кнопка не показывала неверное состояние другому игроку.
+    slot: 0
+    mainmenu: both
+    material: "PLAYER_HEAD"
+    name: "&f%player%"
+    lore:
+      - ""
+      - "&7Текущая: %color%%name%"
+      - "&7Прогресс: &f%progress%"
 
-  info:
-    # enabled добавлено 2026-09-23. Настройка slot и command добавлена 2026-09-26.
+  # Кнопка управления (Вк) — переключение уведомлений (слот 4 в Header)
+  notifications:
     enabled: true
-    # Слот кнопки (по умолчанию 51, footer-слот 51, позиция "Д"). Можно переместить в любой слот (0-53).
+    slot: 4
+    mainmenu: both
+    material: "PLAYER_HEAD"
+    texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI2MDZiY2M4MDY3MTZjZWI4YjM0NmE2ZmQ4NTI3ZWEzZjQ0ODkyYWUwZGM2MjMxMTk0YWQ3NzU3MmZkNTQ3MCJ9fX0="
+    name: "&eУведомления: %state%"
+    lore:
+      - ""
+      - "&7Статус: %state%"
+      - ""
+      - "&7Титры, сообщения и звуки"
+      - "&7о прогрессе и деградации адаптаций."
+      - ""
+      - "&eЛКМ &7— переключить"
+
+  # Кнопка информации (слот 51 в Footer, позиция "Д")
+  info:
+    enabled: true
     slot: 51
-    # command: "" # Команда, выполняемая игроком при клике (без ведущего "/").
-    # mainmenu: true/false # true - ТОЛЬКО в /adaptation mainmenu, false - ТОЛЬКО в обычном /adaptation, не указано - в обоих
-    # material / texture_base64 переопределяют текстуру из heads.yml (ключ info),
-    # если заданы непустыми — добавлено 2026-09-23.
-    # material: ""
-    # texture_base64: ""
+    mainmenu: both
+    command: ""
+    material: "PLAYER_HEAD"
+    texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0="
     name: "&bИнформация"
     lore:
       - ""
       - "&7Адаптации развиваются от вашей активности."
       - "&7Наберите 90% для разблокировки бонусов мастерства!"
 
-  close:
-    # enabled: true
-    # slot: 53 # По умолчанию слот 53
-    # command: "" # Если задано, выполняет команду перед закрытием
-    # mainmenu: true/false # true - ТОЛЬКО в mainmenu, false - ТОЛЬКО в обычном меню, не указано - в обоих
-    # material / texture_base64 переопределяют текстуру из heads.yml (ключ
-    # close), если заданы непустыми — добавлено 2026-09-23.
-    # material: ""
-    # texture_base64: ""
-    name: "&cЗакрыть"
-    lore:
-      - ""
-      - "&7ЛКМ - закрыть меню"
-
+  # Кнопка "Назад" (слот 52 в Footer, позиция 7) — отображается при открытии через /adaptation mainmenu
   back:
-    # Кнопка возврата в предыдущее меню (по умолчанию слот 52).
-    # mainmenu: true - по умолчанию показывается только в /adaptation mainmenu.
-    # При mainmenu: false - показывается в обычном /adaptation. При mainmenu: both - в обоих.
     enabled: true
-    # slot: 52 # По умолчанию слот 52
+    slot: 52
     mainmenu: true
-    # command: "" # добавлено 2026-09-23 — переопределяет gui.mainmenu_back_command
-    # из config.yml, если задано непустым.
-    # material / texture_base64 переопределяют текстуру из heads.yml (ключ back),
-    # если заданы непустыми — добавлено 2026-09-23.
-    # material: ""
-    # texture_base64: ""
+    command: ""
+    material: "PLAYER_HEAD"
+    texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ=="
     name: "&7Назад"
     lore:
       - ""
-      - "&7ЛКМ - вернуться назад"
+      - "&7ЛКМ — вернуться назад"
 
-  player_head:
+  # Кнопка "Закрыть" (слот 53 в Footer, позиция 8)
+  close:
+    enabled: true
+    slot: 53
+    mainmenu: both
+    command: ""
+    material: "PLAYER_HEAD"
+    texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ=="
+    name: "&cЗакрыть"
     lore:
       - ""
-      - "&7Текущая: %color%%name%"
-      - "&7Прогресс: &f%progress%"
+      - "&7ЛКМ — закрыть меню"
 
-  # Список полностью новых кнопок сверх встроенных (Info/Back/Close выше) —
-  # добавлено 2026-09-23. Каждая запись может иметь slot, command, enabled и mainmenu.
-  # Пример (закомментирован):
+  # Пользовательские кнопки сверх стандартных (размещаются в свободных слотах рабочей зоны 28-34, 37-43)
+  # Пример:
   # custom_buttons:
-  #   - slot: 30
+  #   - slot: 31
   #     enabled: true
-  #     mainmenu: true # true - только в mainmenu, false - только в обычном, не указано - в обоих
-  #     material: "NETHER_STAR"
-  #     name: "&dПример кнопки"
-  #     lore: ["&7Нажмите, чтобы выполнить команду"]
-  #     command: "someplugin somecommand"
+  #     mainmenu: both
+  #     material: "PLAYER_HEAD"
+  #     texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMxMmNhNDYzMmRlZjVmZmFmMmViMGQ5ZDdjYzdiNTVhNTBjNGUzOTIwZDkwMzcyYWFiMTQwNzgxZjVkZmJjNCJ9fX0="
+  #     name: "&aКастомное действие"
+  #     lore:
+  #       - "&7Пример пользовательской кнопки"
+  #       - "&aЛКМ &7— нажать"
+  #     command: "spawn"
   custom_buttons: []

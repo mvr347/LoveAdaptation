@@ -1,7 +1,21 @@
-# Base64-текстуры служебных иконок GUI-меню адаптаций (кнопки "Информация" и
-# "Закрыть"). Текстуры самих адаптаций (голова для каждой стихии) задаются
-# отдельно — см. adaptations.<type>.head_texture и base_adaptation.head_texture
-# в config.yml, каждая уникальна для своей адаптации.
+# ==============================================================================
+#                      LoveAdaptation — Heads Database
+#             Base64-текстуры служебных иконок GUI-меню адаптаций
+#             Стандарт оформления: UNIFIED STANDARD (gui_gen v2.1)
+# ==============================================================================
+
+# Иконка "Информация" (слот 51, буква "i")
 info: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0="
-close: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWZkMjQwMDAwMmFkOWZiYmJkMDA2Njk0MWViNWIxYTM4NGFiOWIwZTQ4YTE3OGVlOTZlNGQxMjlhNTIwODY1NCJ9fX0="
+
+# Иконка "Закрыть" (слот 53, стандартный красный крестик ✕ gui_gen v2.1)
+close: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ=="
+
+# Иконка "Назад" (слот 52, стандартная стрелочка ← gui_gen v2.1)
 back: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ=="
+
+# Иконка "Уведомления" (слот 4, золотой колокол)
+notifications: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI2MDZiY2M4MDY3MTZjZWI4YjM0NmE2ZmQ4NTI3ZWEzZjQ0ODkyYWUwZGM2MjMxMTk0YWQ3NzU3MmZkNTQ3MCJ9fX0="
+
+# Состояние ВКЛ / ВЫКЛ (опционально для тумблеров)
+notifications_on: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2FmNmMzY2FjOTRjODk0NGQwNDQxNTBjMWRkNWU0ZTZhYjUzYTAxMzgyZGFlNDYzOTE0ZmIzYmU1YTI3MzE5ZCJ9fX0="
+notifications_off: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmM1MzQ1MjkwZDdlNDRkZWEzYTg5MGQ0ZDAxNDBmYzEwYTUyYTkwOTc2NzQzOGYwZjViNWQyODc3Y2JhNDg0YyJ9fX0="

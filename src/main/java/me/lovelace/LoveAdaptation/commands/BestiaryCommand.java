@@ -30,7 +30,7 @@ public class BestiaryCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length == 0) {
             if (sender instanceof Player player) {

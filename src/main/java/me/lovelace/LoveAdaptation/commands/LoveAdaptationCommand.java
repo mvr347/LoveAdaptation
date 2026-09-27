@@ -28,7 +28,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length == 0 || args[0].equalsIgnoreCase("menu") || args[0].equalsIgnoreCase("mainmenu")
                 || args[0].equalsIgnoreCase("меню") || args[0].equalsIgnoreCase("главменю")) {
@@ -139,7 +139,7 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendAdminMoved(CommandSender sender, String newCommand) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
         String msg = plugin.getConfig().getString("lang.admin_moved", "&eЭта команда перемещена. Используйте: &f%command%").replace("%command%", newCommand);
         sender.sendMessage(Utils.color(prefix + msg));
     }

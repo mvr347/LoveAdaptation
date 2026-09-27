@@ -11,6 +11,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -24,6 +27,8 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final LegacyComponentSerializer LEGACY_SECTION = LegacyComponentSerializer.legacySection();
 
     private static Logger logger() {
         try {
@@ -35,6 +40,13 @@ public class Utils {
 
     public static String color(String text) {
         if (text == null) return "";
+        if (text.contains("<") && text.contains(">")) {
+            try {
+                text = LEGACY_SECTION.serialize(MINI_MESSAGE.deserialize(text));
+            } catch (Throwable ignored) {
+                // fallback to raw text if invalid tag
+            }
+        }
         Matcher matcher = HEX_PATTERN.matcher(text);
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {

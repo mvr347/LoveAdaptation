@@ -54,12 +54,10 @@ public final class HeadTextures {
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZTRkOTY2N2RkOGU5ZTY0MjYxN2RhMGFjMWJkZGY1YTk3ZDE3NzIyYzBhMzk4MGMxMjhiNDVjMTkwNzAifX19";
 
     /**
-     * Текстура головы адаптации «Страж Бездны» (бывший «Скиталец Эндера»/Энд, заменён на тему
-     * глубоких пещер/Deep Dark). Текстура временно унаследована от старой адаптации — админ
-     * может переопределить {@code adaptations.abyss.head_texture} в config.yml на свою.
+     * Текстура головы адаптации «Страж Бездны» (Warden / Deep Dark).
      */
     public static final String ABYSS =
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I5ODNlY2VhNTJlM2Y3ODNlNWYxY2Y2YWVkNWI0Yjc2NWVkZjhiNzc0ZDNlNTExM2EzNTAzYWIxYjY5YmEyIn19fQ==";
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWYwMGMzNDI5YTYzZjMzZjcyM2RlY2MzNThkMTcyM2U2ZDBjMzkyYTI2N2QwYzFmZTM2YTEzNjE3NTA0N2U2ZSJ9fX0=";
 
     /**
      * Текстура головы адаптации «Боевой закал» (бой).
@@ -80,17 +78,24 @@ public final class HeadTextures {
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMyMmE1NzY1NDA2YWU0YTg0YzFlMGZiYjkxODMzN2JmMzU0ZWM3ZWJkODllNDE3MzI1MzljZjhkZTQ1OTA5ZiJ9fX0=";
 
     /**
-     * Текстура кнопки "Закрыть" нативного GUI (резерв на случай отсутствия ключа {@code close} в heads.yml).
+     * Текстура кнопки "Закрыть" нативного GUI (резерв на случай отсутствия ключа {@code close} в heads.yml)
+     * — стандартная иконка ✕ из UNIFIED STANDARD (gui_gen v2.1).
      */
     public static final String BASE_CLOSE_FALLBACK =
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWZkMjQwMDAwMmFkOWZiYmJkMDA2Njk0MWViNWIxYTM4NGFiOWIwZTQ4YTE3OGVlOTZlNGQxMjlhNTIwODY1NCJ9fX0=";
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ==";
 
     /**
      * Текстура кнопки "Назад" нативного GUI (резерв на случай отсутствия ключа {@code back} в heads.yml)
-     * — стандартная иконка ← из gui-gen-скилла Love*-экосистемы.
+     * — стандартная иконка ← из UNIFIED STANDARD (gui_gen v2.1).
      */
     public static final String BASE_BACK_FALLBACK =
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==";
+
+    /**
+     * Текстура кнопки "Уведомления" нативного GUI (колокол, резерв на случай отсутствия ключа в heads.yml).
+     */
+    public static final String BASE_NOTIFICATIONS_FALLBACK =
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI2MDZiY2M4MDY3MTZjZWI4YjM0NmE2ZmQ4NTI3ZWEzZjQ0ODkyYWUwZGM2MjMxMTk0YWQ3NzU3MmZkNTQ3MCJ9fX0=";
 
     /**
      * Возвращает резервную текстуру головы для указанного типа адаптации.

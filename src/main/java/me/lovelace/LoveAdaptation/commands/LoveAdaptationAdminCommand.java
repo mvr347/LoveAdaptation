@@ -45,7 +45,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (!sender.hasPermission("loveadaptation.admin")) {
             sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
@@ -69,14 +69,14 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
     }
 
     private void handleReload(CommandSender sender) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
         plugin.reloadConfig();
         PluginManager.getInstance().getAdaptationManager().saveAllPlayers();
         sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.reloaded", "&aКонфигурация и база данных успешно перезагружены!")));
     }
 
     private void handleReset(CommandSender sender, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length < 2) {
             sender.sendMessage(Utils.color(prefix + "&cИспользование: /loveadaptationadmin reset <player>"));
@@ -106,7 +106,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
     }
 
     private void handleCheck(CommandSender sender, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length < 2) {
             sender.sendMessage(Utils.color(prefix + "&cИспользование: /loveadaptationadmin check <adaptation_name> [player]"));
@@ -144,7 +144,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
     }
 
     private void handleGivePotion(CommandSender sender, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length < 3) {
             sender.sendMessage(Utils.color(prefix + "&cИспользование: /loveadaptationadmin givepotion <player> <1|2>"));
@@ -176,7 +176,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
     }
 
     private void handleGiveBestiary(CommandSender sender, String[] args) {
-        String prefix = plugin.getConfig().getString("lang.prefix", "&8[&6LoveAdaptation&8] ");
+        String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (args.length < 2) {
             if (sender instanceof Player player) {

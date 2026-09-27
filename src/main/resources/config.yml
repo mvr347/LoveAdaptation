@@ -132,7 +132,7 @@ adaptations:
     y_threshold: -40
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I5ODNlY2VhNTJlM2Y3ODNlNWYxY2Y2YWVkNWI0Yjc2NWVkZjhiNzc0ZDNlNTExM2EzNTAzYWIxYjY5YmEyIn19fQ=="
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWYwMGMzNDI5YTYzZjMzZjcyM2RlY2MzNThkMTcyM2U2ZDBjMzkyYTI2N2QwYzFmZTM2YTEzNjE3NTA0N2U2ZSJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     effects_base:
       - type: "NIGHT_VISION"
@@ -369,7 +369,7 @@ gui:
   mainmenu_back_command: ""
 
 lang:
-  prefix: "&8[&6LoveAdaptation&8] "
+  prefix: "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> "
   no_permission: "&cУ вас нет прав для выполнения этой команды."
   only_players: "&cЭта команда доступна только игрокам."
   reloaded: "&aКонфигурация и база данных успешно перезагружены!"
