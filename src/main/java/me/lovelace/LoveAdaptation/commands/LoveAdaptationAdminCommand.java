@@ -71,6 +71,7 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
     private void handleReload(CommandSender sender) {
         String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
         plugin.reloadConfig();
+        me.lovelace.LoveAdaptation.config.HeadsConfig.reload();
         PluginManager.getInstance().getAdaptationManager().saveAllPlayers();
         sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.reloaded", "&aКонфигурация и база данных успешно перезагружены!")));
     }
