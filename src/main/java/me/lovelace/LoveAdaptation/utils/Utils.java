@@ -131,6 +131,7 @@ public class Utils {
     }
 
     private static void applyTexture(SkullMeta meta, String texture) {
+        texture = texture.trim();
         try {
             PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
             PlayerTextures textures = profile.getTextures();

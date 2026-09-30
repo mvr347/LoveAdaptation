@@ -15,12 +15,21 @@ public final class HeadsConfig {
     private HeadsConfig() {
     }
 
+    /** Drops the cached heads.yml so the next {@link #get} re-reads it (called on /adaptation reload). */
+    public static void reload() {
+        synchronized (HeadsConfig.class) {
+            config = null;
+        }
+    }
+
     public static String get(String key, String fallback) {
         YamlConfiguration yaml = config();
         if (yaml == null) {
             return fallback;
         }
-        return yaml.getString(key, fallback);
+        String value = yaml.getString(key, fallback);
+        // A stray space or newline around a pasted base64 value would make the decoder throw.
+        return value == null ? fallback : value.trim();
     }
 
     private static YamlConfiguration config() {
