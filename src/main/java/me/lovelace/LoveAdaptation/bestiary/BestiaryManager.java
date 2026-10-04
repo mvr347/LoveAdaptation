@@ -155,7 +155,7 @@ public class BestiaryManager {
             }
             List<Component> lore = new ArrayList<>();
             for (String l : rawLore) {
-                lore.add(Component.text(Utils.color(l)));
+                lore.add(Component.text(Utils.color(l)).decoration(TextDecoration.ITALIC, false));
             }
             meta.lore(lore);
 
@@ -358,18 +358,18 @@ public class BestiaryManager {
 
             // Обновление Lore книги
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Физический журнал исследований."));
-            lore.add(Component.text("§7Заполняется во время живой охоты."));
-            lore.add(Component.text(" "));
-            lore.add(Component.text("§6Последнее наблюдение:"));
+            lore.add(Component.text("§7Физический журнал исследований.").decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("§7Заполняется во время живой охоты.").decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text(" ").decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("§6Последнее наблюдение:").decoration(TextDecoration.ITALIC, false));
             if (displaySub != null && !displaySub.isEmpty()) {
-                lore.add(Component.text(" §f- §e" + mobName + "§7: §a" + newKills + " §7особей (" + displaySub + ")"));
+                lore.add(Component.text(" §f- §e" + mobName + "§7: §a" + newKills + " §7особей (" + displaySub + ")").decoration(TextDecoration.ITALIC, false));
             } else {
-                lore.add(Component.text(" §f- §e" + mobName + "§7: §a" + newKills + " §7особей"));
+                lore.add(Component.text(" §f- §e" + mobName + "§7: §a" + newKills + " §7особей").decoration(TextDecoration.ITALIC, false));
             }
-            lore.add(Component.text(" "));
-            lore.add(Component.text("§e[ПКМ] §7- Открыть страницы бестиария."));
-            lore.add(Component.text("§8Бонусы активны, пока книга в инвентаре."));
+            lore.add(Component.text(" ").decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("§e[ПКМ] §7- Открыть страницы бестиария.").decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("§8Бонусы активны, пока книга в инвентаре.").decoration(TextDecoration.ITALIC, false));
             meta.lore(lore);
         }
 
@@ -403,64 +403,50 @@ public class BestiaryManager {
         int currentStage = (speciesKills < 5) ? 1 : (speciesKills < 20) ? 2 : (speciesKills < 50) ? 3 : 4;
 
         TextComponent.Builder hover = Component.text();
-        hover.append(Component.text("⭐ ", NamedTextColor.GOLD, TextDecoration.ITALIC))
-                .append(Component.text("БОЕВЫЕ БАФФЫ БЕСТИАРИЯ\n", NamedTextColor.YELLOW, TextDecoration.ITALIC));
+        hover.append(Component.text("Боевые бонусы бестиария\n", NamedTextColor.GOLD));
         hover.append(Component.text("Семейство: ", NamedTextColor.GRAY))
-                .append(Component.text(familyName + "\n", NamedTextColor.GOLD, TextDecoration.ITALIC));
-        hover.append(Component.text("────────────────────────\n", NamedTextColor.DARK_GRAY));
-        hover.append(Component.text("• Убито этого вида: ", NamedTextColor.GRAY))
-                .append(Component.text(speciesKills + " особей\n", NamedTextColor.WHITE, TextDecoration.ITALIC));
-        hover.append(Component.text("• Прогресс семейства: ", NamedTextColor.GRAY))
-                .append(Component.text(familyKills + " особей\n", NamedTextColor.AQUA, TextDecoration.ITALIC));
-        hover.append(Component.text("• Текущая запись: ", NamedTextColor.GRAY))
-                .append(Component.text("Запись " + currentStage + "\n\n", NamedTextColor.GOLD, TextDecoration.ITALIC));
+                .append(Component.text(familyName + "\n", NamedTextColor.WHITE));
+        hover.append(Component.text("Убито этого вида: ", NamedTextColor.GRAY))
+                .append(Component.text(speciesKills + "\n", NamedTextColor.WHITE));
+        hover.append(Component.text("Убито в семействе: ", NamedTextColor.GRAY))
+                .append(Component.text(familyKills + "\n", NamedTextColor.WHITE));
+        hover.append(Component.text("Запись: ", NamedTextColor.GRAY))
+                .append(Component.text(currentStage + "\n\n", NamedTextColor.WHITE));
 
-        hover.append(Component.text("АКТИВНЫЕ БОНУСЫ:\n", NamedTextColor.GREEN, TextDecoration.ITALIC));
         if (tier == ResearchTier.NONE) {
             int reqT1 = getTierRequiredKills(ResearchTier.TIER_1);
             int reqT2 = getTierRequiredKills(ResearchTier.TIER_2);
-            hover.append(Component.text(" ✖ Бонус к урону: ", NamedTextColor.DARK_GRAY))
-                    .append(Component.text("не активен (нужно " + reqT1 + ")\n", NamedTextColor.RED));
-            hover.append(Component.text(" ✖ Защита от атак: ", NamedTextColor.DARK_GRAY))
-                    .append(Component.text("не активна (нужно " + reqT2 + ")\n", NamedTextColor.RED));
-            hover.append(Component.text(" ✖ Шкала HP: ", NamedTextColor.DARK_GRAY))
-                    .append(Component.text("скрыта (нужно 50)\n", NamedTextColor.RED));
+            hover.append(Component.text("Урон: ", NamedTextColor.GRAY))
+                    .append(Component.text("с " + reqT1 + " убийств в семействе\n", NamedTextColor.DARK_GRAY));
+            hover.append(Component.text("Защита: ", NamedTextColor.GRAY))
+                    .append(Component.text("с " + reqT2 + " убийств в семействе\n", NamedTextColor.DARK_GRAY));
+            hover.append(Component.text("Шкала HP врага: ", NamedTextColor.GRAY))
+                    .append(Component.text("с " + reqT1 + " убийств в семействе\n", NamedTextColor.DARK_GRAY));
         } else {
             int dmgPct = (int) Math.round(getTierBonusDamage(tier) * 100);
             double res = getTierResistance(tier);
-            hover.append(Component.text(" ✔ Бонус к урону: ", NamedTextColor.DARK_GREEN))
-                    .append(Component.text("+" + dmgPct + "% по семейству\n", NamedTextColor.GREEN, TextDecoration.ITALIC));
+            hover.append(Component.text("Урон по семейству: ", NamedTextColor.GRAY))
+                    .append(Component.text("+" + dmgPct + "%\n", NamedTextColor.GREEN));
             if (res > 0.0) {
-                int resPct = (int) Math.round(res * 100);
-                hover.append(Component.text(" ✔ Защита от атак: ", NamedTextColor.DARK_GREEN))
-                        .append(Component.text("+" + resPct + "% от атак\n", NamedTextColor.GREEN, TextDecoration.ITALIC));
+                hover.append(Component.text("Защита от атак: ", NamedTextColor.GRAY))
+                        .append(Component.text("+" + (int) Math.round(res * 100) + "%\n", NamedTextColor.GREEN));
             } else {
-                hover.append(Component.text(" ✖ Защита от атак: ", NamedTextColor.DARK_GRAY))
-                        .append(Component.text("нет (доступна со 2-й записи)\n", NamedTextColor.GRAY));
+                hover.append(Component.text("Защита от атак: ", NamedTextColor.GRAY))
+                        .append(Component.text("со 2-й записи\n", NamedTextColor.DARK_GRAY));
             }
-            hover.append(Component.text(" ✔ Шкала здоровья (HP): ", NamedTextColor.DARK_GREEN))
-                    .append(Component.text("Отображается в бою\n", NamedTextColor.AQUA));
+            hover.append(Component.text("Шкала HP врага: ", NamedTextColor.GRAY))
+                    .append(Component.text("в бою\n", NamedTextColor.GREEN));
         }
 
-        hover.append(Component.text("────────────────────────\n", NamedTextColor.DARK_GRAY));
+        hover.append(Component.text("\n"));
         if (nextTier != null) {
-            int nextReq = getTierRequiredKills(nextTier);
-            int left = Math.max(0, nextReq - familyKills);
-            hover.append(Component.text("До след. записи (", NamedTextColor.GRAY))
-                    .append(Component.text(getTierShortBadge(nextTier), NamedTextColor.YELLOW))
-                    .append(Component.text("): ", NamedTextColor.GRAY))
-                    .append(Component.text(left + " убийств\n", NamedTextColor.GOLD, TextDecoration.ITALIC));
-            hover.append(Component.text(" Следующие бонусы: ", NamedTextColor.GRAY))
-                    .append(Component.text("+" + (int) Math.round(getTierBonusDamage(nextTier) * 100) + "% ур.", NamedTextColor.WHITE));
-            if (getTierResistance(nextTier) > 0.0) {
-                hover.append(Component.text(", +" + (int) Math.round(getTierResistance(nextTier) * 100) + "% защ.", NamedTextColor.WHITE));
-            }
-            hover.append(Component.text("\n", NamedTextColor.GRAY));
+            int left = Math.max(0, getTierRequiredKills(nextTier) - familyKills);
+            hover.append(Component.text("До следующей записи: ", NamedTextColor.GRAY))
+                    .append(Component.text(left + " убийств\n", NamedTextColor.WHITE));
         } else {
-            hover.append(Component.text("👑 Максимальный уровень изучения!\n", NamedTextColor.GOLD, TextDecoration.ITALIC));
+            hover.append(Component.text("Изучено полностью\n", NamedTextColor.GOLD));
         }
-        hover.append(Component.text("────────────────────────\n", NamedTextColor.DARK_GRAY));
-        hover.append(Component.text("Бонусы активны, пока книга в инвентаре", NamedTextColor.DARK_AQUA, TextDecoration.ITALIC));
+        hover.append(Component.text("Бонусы работают, пока книга в инвентаре", NamedTextColor.DARK_GRAY));
 
         return hover.build();
     }
@@ -541,17 +527,17 @@ public class BestiaryManager {
 
         List<Component> lines = new ArrayList<>();
         TextComponent.Builder first = Component.text()
-                .append(heading(mobName, NamedTextColor.DARK_BLUE));
+                .append(heading(mobName, NamedTextColor.DARK_RED));
         if (BookFont.width(oneLine) <= pagePx()) {
-            if (familyToken != null) first.append(Component.text(" " + familyToken, NamedTextColor.DARK_GRAY));
-            if (markerToken != null) first.append(Component.text(" " + markerToken, NamedTextColor.DARK_GRAY));
+            if (familyToken != null) first.append(ink(" " + familyToken, NamedTextColor.DARK_GRAY));
+            if (markerToken != null) first.append(ink(" " + markerToken, NamedTextColor.DARK_GRAY));
             lines.add(first.build());
         } else {
             lines.add(first.build());
             TextComponent.Builder second = Component.text();
-            if (familyToken != null) second.append(Component.text(familyToken, NamedTextColor.DARK_GRAY));
+            if (familyToken != null) second.append(ink(familyToken, NamedTextColor.DARK_GRAY));
             if (markerToken != null) {
-                second.append(Component.text((familyToken != null ? " " : "") + markerToken, NamedTextColor.DARK_GRAY));
+                second.append(ink((familyToken != null ? " " : "") + markerToken, NamedTextColor.DARK_GRAY));
             }
             lines.add(second.build());
         }
@@ -581,12 +567,9 @@ public class BestiaryManager {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.text()
                 .append(ink("Убито: ", NamedTextColor.BLACK))
-                .append(Component.text(String.valueOf(speciesKills), NamedTextColor.DARK_GREEN, TextDecoration.ITALIC))
+                .append(ink(String.valueOf(speciesKills), NamedTextColor.DARK_GREEN))
                 .build());
-        lines.add(Component.text()
-                .append(Component.text(recordBadge, NamedTextColor.GOLD, TextDecoration.ITALIC))
-                .append(Component.text(" [?]", NamedTextColor.DARK_AQUA, TextDecoration.ITALIC))
-                .build());
+        lines.add(ink(recordBadge, NamedTextColor.DARK_GRAY));
         return lines;
     }
 
@@ -598,23 +581,16 @@ public class BestiaryManager {
      */
     private List<Component> buildFooterLines(ResearchTier tier, int speciesKills) {
         List<Component> lines = new ArrayList<>();
+        int px = pagePx();
         if (tier == ResearchTier.NONE) {
-            if (speciesKills >= 50) {
-                lines.add(Component.text("✔ Анатомия изучена", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC));
-            }
-            lines.add(Component.text("[⭐ Наведите для бонусов]", NamedTextColor.DARK_BLUE, TextDecoration.UNDERLINED));
+            lines.add(ink(BookFont.fit(speciesKills >= 50 ? "Анатомия изучена" : "Бонусов пока нет", px), NamedTextColor.DARK_GRAY));
         } else {
             int dmgPct = (int) Math.round(getTierBonusDamage(tier) * 100);
-            lines.add(Component.text()
-                    .append(Component.text("⭐ Бонус: ", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC))
-                    .append(Component.text("+" + dmgPct + "% ур.", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC))
-                    .build());
+            lines.add(ink(BookFont.fit("Урон: +" + dmgPct + "%", px), NamedTextColor.DARK_GREEN));
             double res = getTierResistance(tier);
             if (res > 0.0) {
-                int resPct = (int) Math.round(res * 100);
-                lines.add(ink("+" + resPct + "% защ.", NamedTextColor.DARK_GREEN));
+                lines.add(ink(BookFont.fit("Защита: +" + (int) Math.round(res * 100) + "%", px), NamedTextColor.DARK_GREEN));
             }
-            lines.add(Component.text("[Наведите для деталей]", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
         }
         return lines;
     }
@@ -663,24 +639,22 @@ public class BestiaryManager {
             titlePageBuilder.append(heading(l + "\n", NamedTextColor.DARK_RED));
         }
         if (BookFont.width(authorLabel + player.getName()) <= pagePx()) {
-            titlePageBuilder.append(Component.text(authorLabel, NamedTextColor.DARK_RED, TextDecoration.ITALIC))
-                    .append(Component.text(player.getName() + "\n", NamedTextColor.DARK_BLUE, TextDecoration.ITALIC));
+            titlePageBuilder.append(ink(authorLabel, NamedTextColor.BLACK))
+                    .append(ink(player.getName() + "\n", NamedTextColor.DARK_GRAY));
         } else {
-            titlePageBuilder.append(Component.text(authorLabel + "\n", NamedTextColor.DARK_RED, TextDecoration.ITALIC))
-                    .append(Component.text(player.getName() + "\n", NamedTextColor.DARK_BLUE, TextDecoration.ITALIC));
+            titlePageBuilder.append(ink(authorLabel + "\n", NamedTextColor.BLACK))
+                    .append(ink(player.getName() + "\n", NamedTextColor.DARK_GRAY));
         }
         Component titlePage = titlePageBuilder
-                .append(Component.text(titleSubtitle + "\n", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC))
+                .append(ink(BookFont.fit(titleSubtitle, pagePx()) + "\n", NamedTextColor.DARK_GRAY))
                 .append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY))
-                .append(ink("Открыто видов: ", NamedTextColor.BLACK))
-                .append(Component.text(discoveredSpeciesCount + "/" + StudiedMob.values().length + "\n", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC))
-                .append(ink("Всего убито: ", NamedTextColor.BLACK))
-                .append(Component.text(totalKills + " особей\n", NamedTextColor.GOLD, TextDecoration.ITALIC))
+                .append(ink("Видов: ", NamedTextColor.BLACK))
+                .append(ink(discoveredSpeciesCount + "/" + StudiedMob.values().length + "\n", NamedTextColor.DARK_GREEN))
+                .append(ink("Убито: ", NamedTextColor.BLACK))
+                .append(ink(totalKills + "\n", NamedTextColor.DARK_GREEN))
                 .append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY))
-                .append(ink("• Бонусы на семейство\n", NamedTextColor.DARK_BLUE))
-                .append(ink("• Держите книгу при себе\n", NamedTextColor.DARK_BLUE))
-                .append(Component.text("• Наведите на текст для бонусов\n", NamedTextColor.DARK_GREEN, TextDecoration.ITALIC)
-                        .hoverEvent(HoverEvent.showText(Component.text("⭐ Наводите на статусы мобов для просмотра подробных боевых баффов!", NamedTextColor.GOLD))))
+                .append(ink("Носите книгу с собой: бонусы работают, пока она в инвентаре.", NamedTextColor.DARK_GRAY)
+                        .hoverEvent(HoverEvent.showText(Component.text("Наводите на строки мобов — там подробные бонусы.", NamedTextColor.GOLD))))
                 .build();
         pages.add(titlePage);
 
@@ -731,13 +705,13 @@ public class BestiaryManager {
 
                 Component hoverTooltip = createBuffsHoverComponent(mob, speciesKills, familyKills);
 
-                String stageTitle = getMobStageHeader(speciesKills);
                 String stageText = getMobStageContent(mob, speciesKills);
 
                 List<String> contentLines = BookFont.wrap(stageText, pagePx());
                 List<String> subtitleLines = (familyDiscovered && subTitle != null && !subTitle.isEmpty())
                         ? BookFont.wrap(subTitle, pagePx()) : List.of();
-                List<String> stageTitleLines = BookFont.wrap(stageTitle, pagePx());
+                // The stage header ("Полевая запись (I)") is gone: "Запись k" already says it, and it cost two lines.
+                List<String> stageTitleLines = List.of();
                 List<Component> statsLines = buildStatsLines(speciesKills, recordBadge);
                 List<Component> footerLines = buildFooterLines(tier, speciesKills);
 
@@ -797,17 +771,13 @@ public class BestiaryManager {
 
                         if (!subtitleLines.isEmpty()) {
                             for (String sl : subtitleLines) {
-                                pageBuilder.append(Component.text(sl + "\n", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC));
+                                pageBuilder.append(ink(sl + "\n", NamedTextColor.DARK_GRAY));
                             }
                         }
 
                         appendLinesWithHover(pageBuilder, statsLines, hoverTooltip);
 
                         pageBuilder.append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY));
-                        for (String stl : stageTitleLines) {
-                            pageBuilder.append(heading(stl + "\n", NamedTextColor.DARK_RED));
-                        }
-
                         for (String l : lines) {
                             pageBuilder.append(ink(l + "\n", NamedTextColor.BLACK));
                         }
@@ -815,7 +785,7 @@ public class BestiaryManager {
                         pageBuilder.append(Component.text(separator + "\n", NamedTextColor.DARK_GRAY));
 
                         if (totalMobPages > 1) {
-                            Component continuationNotice = Component.text("[➡ Стр. 1/" + totalMobPages + " • Листайте]", NamedTextColor.DARK_BLUE, TextDecoration.ITALIC)
+                            Component continuationNotice = ink("Стр. 1/" + totalMobPages + ", далее", NamedTextColor.DARK_GRAY)
                                     .hoverEvent(HoverEvent.showText(hoverTooltip));
                             pageBuilder.append(continuationNotice);
                         } else {
