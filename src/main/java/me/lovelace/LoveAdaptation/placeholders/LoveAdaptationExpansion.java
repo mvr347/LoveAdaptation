@@ -108,7 +108,9 @@ public class LoveAdaptationExpansion extends PlaceholderExpansion {
                 AdaptationData adaptData = data.getAdaptationData(type);
                 double percent = adaptData != null ? adaptData.getProgressPercent() : 0.0;
                 boolean isCurrent = data.getCurrentAdaptation() == type;
-                boolean isBlocked = data.getCurrentAdaptation() != AdaptationType.BASE && !isCurrent && data.getAdaptationData(data.getCurrentAdaptation()).getProgressPercent() >= 90.0;
+                AdaptationData currentData = data.getAdaptationData(data.getCurrentAdaptation());
+                boolean isBlocked = isBlocked(data.getCurrentAdaptation(), type,
+                        currentData != null ? currentData.getProgressPercent() : null);
 
                 if (sub.equals("progress")) {
                     if (isBlocked) return "🔒";
@@ -138,5 +140,14 @@ public class LoveAdaptationExpansion extends PlaceholderExpansion {
         }
 
         return null;
+    }
+
+    /**
+     * An adaptation is locked while another one sits at mastery (90%+). The current adaptation may
+     * have no saved data yet (a null percent), which must read as "not mastered", never throw.
+     */
+    static boolean isBlocked(AdaptationType current, AdaptationType type, Double currentPercent) {
+        if (current == AdaptationType.BASE || type == current) return false;
+        return currentPercent != null && currentPercent >= 90.0;
     }
 }

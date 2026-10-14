@@ -108,7 +108,7 @@ public class BestiaryListener implements Listener {
                     String actionbarMsg = actionbarPattern.replace("%mob_name%", mobName)
                             .replace("%current_hp%", String.format(Locale.US, "%.1f", healthRemaining))
                             .replace("%max_hp%", String.format(Locale.US, "%.1f", maxHealth));
-                    Utils.sendActionBar(playerAttacker, actionbarMsg);
+                    Utils.sendHudActionBar(playerAttacker, actionbarMsg);
 
                     double bonus = bestiaryManager.getTierBonusDamage(tier);
                     if (isFarmMob(target)) {
