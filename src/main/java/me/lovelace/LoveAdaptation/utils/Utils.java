@@ -76,21 +76,39 @@ public class Utils {
         }
     }
 
+    /** Legacy/MiniMessage string to Adventure component, same colour rules as {@link #color}. */
+    public static net.kyori.adventure.text.Component component(String message) {
+        return LEGACY_SECTION.deserialize(color(message));
+    }
+
+    /** Event-style action bar notice, routed through LoveNotify (see {@link Notify}). */
     public static void sendActionBar(Player player, String message) {
         if (player != null && message != null && !message.isEmpty()) {
-            // Не кэшируем Optional<LoveNotify> — сосед может зарегистрировать реализацию
-            // позже, см. LoveCore.service(...) javadoc в LoveCore.
-            boolean allowed = dev.lovelace.lovecore.api.LoveCore.service(dev.lovelace.lovecore.api.notify.LoveNotify.class)
-                    .map(n -> n.isChannelEnabled(player.getUniqueId(), dev.lovelace.lovecore.api.notify.LoveNotify.Channel.ACTION_BAR))
-                    .orElse(true);
-            if (!allowed) {
-                return;
-            }
-            try {
-                player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, net.md_5.bungee.api.chat.TextComponent.fromLegacyText(color(message)));
-            } catch (Throwable t) {
-                player.sendMessage(color(message));
-            }
+            Notify.actionBar(player, component(message));
+        }
+    }
+
+    /** Event-style critical notice (always mirrored to chat by LoveCore). */
+    public static void sendImportantActionBar(Player player, String message) {
+        if (player != null && message != null && !message.isEmpty()) {
+            Notify.important(player, component(message));
+        }
+    }
+
+    /** Event-style title + subtitle, routed through LoveNotify. */
+    public static void sendTitle(Player player, String title, String subtitle) {
+        if (player != null) {
+            Notify.title(player, component(title), component(subtitle));
+        }
+    }
+
+    /**
+     * Combat HUD read-out: fires on every hit, so it deliberately bypasses LoveNotify
+     * (a chat fallback per hit would flood the chat for players with the action bar off).
+     */
+    public static void sendHudActionBar(Player player, String message) {
+        if (player != null && message != null && !message.isEmpty()) {
+            player.sendActionBar(component(message));
         }
     }
 

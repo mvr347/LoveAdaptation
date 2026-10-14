@@ -174,7 +174,7 @@ public class AdaptationManager {
                 float vol = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_volume", 1.0);
                 float pitch = (float) plugin.getConfig().getDouble("notifications.mastery_unlock.sound_pitch", 1.2);
 
-                player.sendTitle(Utils.color(title), Utils.color(subtitle), 10, 60, 20);
+                Utils.sendTitle(player, title, subtitle);
                 Utils.playSound(player, sound, vol, pitch);
             }
         }
@@ -321,7 +321,8 @@ public class AdaptationManager {
                 if (data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_deactivated.enabled", true)) {
                     String name = getAdaptationDisplayName(current);
                     String msg = plugin.getConfig().getString("notifications.adaptation_deactivated.actionbar", "&cАдаптация потеряна: &f%adaptation_name%").replace("%adaptation_name%", name);
-                    Utils.sendActionBar(player, msg);
+                    // Losing an adaptation is a loss of progress: always mirrored to chat
+                    Utils.sendImportantActionBar(player, msg);
                     Utils.playSound(player, "ENTITY_GENERIC_DEATH", 0.5f, 0.5f);
                 }
             }
