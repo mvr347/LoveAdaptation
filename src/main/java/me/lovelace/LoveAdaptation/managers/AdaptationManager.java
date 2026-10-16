@@ -371,7 +371,44 @@ public class AdaptationManager {
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, level, false, false));
     }
 
+    /** Parsed once per config load instead of getMapList() per player per tick. */
+    private record EffectSpec(PotionEffectType type, int level, int durationTicks, String applyIn, Integer belowY) {}
+
+    private final Map<String, List<EffectSpec>> effectCache = new ConcurrentHashMap<>();
+
+    /** Drop parsed effect lists; call after plugin.reloadConfig(). */
+    public void reloadEffectCache() {
+        effectCache.clear();
+    }
+
+    private List<EffectSpec> getEffectSpecs(String secPath) {
+        return effectCache.computeIfAbsent(secPath, path -> {
+            List<EffectSpec> out = new ArrayList<>();
+            for (Map<?, ?> effectMap : plugin.getConfig().getMapList(path)) {
+                Object typeObj = effectMap.get("type");
+                if (!(typeObj instanceof String typeStr)) continue;
+                // Entries with "trigger" are granted at the event in PlayerListener, not by the periodic loop.
+                if (effectMap.containsKey("trigger")) continue;
+                PotionEffectType effectType = PotionEffectType.getByName(typeStr.toUpperCase());
+                if (effectType == null) continue;
+                int level = effectMap.get("level") instanceof Number n ? n.intValue() : 1;
+                int duration = effectMap.get("duration_ticks") instanceof Number n ? n.intValue() : 40;
+                String applyIn = null;
+                if (effectMap.get("apply_in") instanceof List<?> inList && !inList.isEmpty()) {
+                    applyIn = inList.get(0).toString();
+                }
+                Integer belowY = effectMap.get("apply_below_y") instanceof Number n ? n.intValue() : null;
+                out.add(new EffectSpec(effectType, level, duration, applyIn, belowY));
+            }
+            return Collections.unmodifiableList(out);
+        });
+    }
+
     public void applyEffects(Player player, PlayerData data) {
+        applyEffects(player, data, true);
+    }
+
+    public void applyEffects(Player player, PlayerData data, boolean scanNearbyForGlow) {
         if (player == null || data == null || !player.isOnline()) return;
 
         boolean potionActive = data.isPotionActive();
@@ -387,50 +424,37 @@ public class AdaptationManager {
 
             boolean isMastery = potionActive || adaptData.getProgressPercent() >= 90.0;
             String secPath = "adaptations." + type.getConfigKey() + (isMastery ? ".effects_bonus" : ".effects_base");
-            List<Map<?, ?>> effects = plugin.getConfig().getMapList(secPath);
 
-            for (Map<?, ?> effectMap : effects) {
-                String typeStr = (String) effectMap.get("type");
-                if (typeStr == null) continue;
-
-                // Записи с "trigger" (после урона в бою / после падения) — не для этого
-                // ежетикового цикла: они выдаются точечно из PlayerListener в момент события.
-                // Раньше этот цикл прикладывал их и тут тоже, из-за чего, например, регенерация
-                // "боевого закала" висела на игроке ПОСТОЯННО, пока активна адаптация, а не
-                // только после удара.
-                if (effectMap.containsKey("trigger")) continue;
-
-                int level = effectMap.containsKey("level") ? ((Number) effectMap.get("level")).intValue() : 1;
-                int duration = effectMap.containsKey("duration_ticks") ? ((Number) effectMap.get("duration_ticks")).intValue() : 40;
-
-                PotionEffectType effectType = PotionEffectType.getByName(typeStr.toUpperCase());
-                if (effectType == null) continue;
-
-                // Check condition constraints if required
+            for (EffectSpec spec : getEffectSpecs(secPath)) {
                 if (!potionActive) {
-                    if (effectMap.containsKey("apply_in")) {
-                        List<?> inList = (List<?>) effectMap.get("apply_in");
-                        if (inList != null && !inList.isEmpty()) {
-                            String inCond = inList.get(0).toString();
-                            if ("WATER".equalsIgnoreCase(inCond) && !player.isInWater()) continue;
-                            if ("NETHER".equalsIgnoreCase(inCond) && player.getWorld().getEnvironment() != World.Environment.NETHER) continue;
-                        }
+                    if (spec.applyIn() != null) {
+                        if ("WATER".equalsIgnoreCase(spec.applyIn()) && !player.isInWater()) continue;
+                        if ("NETHER".equalsIgnoreCase(spec.applyIn()) && player.getWorld().getEnvironment() != World.Environment.NETHER) continue;
                     }
-                    if (effectMap.containsKey("apply_below_y")) {
-                        int belowY = ((Number) effectMap.get("apply_below_y")).intValue();
-                        if (player.getLocation().getBlockY() >= belowY) continue;
-                    }
+                    if (spec.belowY() != null && player.getLocation().getBlockY() >= spec.belowY()) continue;
                 }
 
-                if (effectType == PotionEffectType.GLOWING && type == AdaptationType.CAVE) {
-                    // Apply glowing to nearby monsters for cave mastery
+                if (spec.type() == PotionEffectType.GLOWING && type == AdaptationType.CAVE) {
+                    if (!scanNearbyForGlow) continue;
+                    // Glow outlives the (rarer) scan interval so monsters do not flicker.
                     for (Entity nearby : player.getNearbyEntities(16, 16, 16)) {
                         if (nearby instanceof Monster) {
-                            ((Monster) nearby).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 40, 0, false, false));
+                            ((Monster) nearby).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0, false, false));
                         }
                     }
                 } else {
-                    player.addPotionEffect(new PotionEffect(effectType, duration, level - 1, false, false, true));
+                    int amplifier = spec.level() - 1;
+                    PotionEffect current = player.getPotionEffect(spec.type());
+                    // Threshold must exceed the task interval, otherwise the effect would lapse between runs.
+                    int threshold = (int) me.lovelace.LoveAdaptation.tasks.AdaptationTask.INTERVAL_TICKS + 10;
+                    if (AdaptationRules.needsEffectRefresh(current != null,
+                            current != null ? current.getDuration() : 0,
+                            current != null ? current.getAmplifier() : 0,
+                            amplifier, threshold)) {
+                        // Duration is never shorter than the threshold window so refresh gaps cannot appear.
+                        int duration = Math.max(spec.durationTicks(), threshold + 20);
+                        player.addPotionEffect(new PotionEffect(spec.type(), duration, amplifier, false, false, true));
+                    }
                 }
             }
         }

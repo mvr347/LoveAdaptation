@@ -172,7 +172,21 @@ public class BestiaryManager {
         if (item == null || item.getType() != Material.WRITTEN_BOOK) return false;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return false;
-        return meta.getPersistentDataContainer().has(isBestiaryKey, PersistentDataType.BYTE);
+        if (!meta.getPersistentDataContainer().has(isBestiaryKey, PersistentDataType.BYTE)) return false;
+        // Copies of a written book keep the PDC tag (and the data). Only the ORIGINAL counts,
+        // otherwise a book-and-quill copy would duplicate the bestiary with its progress.
+        if (meta instanceof BookMeta book) {
+            BookMeta.Generation gen = book.getGeneration();
+            return gen == null || gen == BookMeta.Generation.ORIGINAL;
+        }
+        return false;
+    }
+
+    /** True if the item carries the bestiary tag regardless of generation (used to block crafting). */
+    public boolean hasBestiaryTag(ItemStack item) {
+        if (item == null || item.getType() != Material.WRITTEN_BOOK) return false;
+        ItemMeta meta = item.getItemMeta();
+        return meta != null && meta.getPersistentDataContainer().has(isBestiaryKey, PersistentDataType.BYTE);
     }
 
     /**

@@ -167,6 +167,17 @@ public class BestiaryListener implements Listener {
         return null;
     }
 
+    // Book copying is a crafting recipe (written book + book and quill); it would clone the bestiary.
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPrepareCraft(org.bukkit.event.inventory.PrepareItemCraftEvent event) {
+        for (ItemStack ingredient : event.getInventory().getMatrix()) {
+            if (bestiaryManager.hasBestiaryTag(ingredient)) {
+                event.getInventory().setResult(null);
+                return;
+            }
+        }
+    }
+
     // =========================================================================
     // 4. ИНТЕРФЕЙС ЧТЕНИЯ КНИГИ (ПКМ)
     // =========================================================================

@@ -64,14 +64,15 @@ public class LoveAdaptationExpansion extends PlaceholderExpansion {
         }
 
         if (params.equals("blocked_count")) {
-            int blocked = 0;
+            boolean activeMastered = false;
             if (data.getCurrentAdaptation() != AdaptationType.BASE) {
                 AdaptationData activeData = data.getAdaptationData(data.getCurrentAdaptation());
-                if (activeData != null && activeData.getProgressPercent() >= 90.0) {
-                    blocked = 6;
-                }
+                activeMastered = activeData != null && activeData.getProgressPercent() >= 90.0;
             }
-            return blocked + "/7 заблокировано";
+            int typeCount = AdaptationType.values().length;
+            int blocked = me.lovelace.LoveAdaptation.managers.AdaptationRules.blockedCount(
+                    typeCount, plugin.getConfig().getBoolean("progression_blocking.enabled", true), activeMastered);
+            return blocked + "/" + me.lovelace.LoveAdaptation.managers.AdaptationRules.totalTypes(typeCount) + " заблокировано";
         }
 
         if (params.equals("potion_cooldown")) {
