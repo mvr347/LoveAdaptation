@@ -17,6 +17,13 @@ public class DatabaseManager {
     private final LoveAdaptation plugin;
     private File dbFile;
     private String connectionUrl;
+    // Single DB thread: a quit-save queued before a rejoin-load always finishes first (FIFO),
+    // so a fast reconnect can no longer load stale rows and then overwrite newer progress.
+    private final java.util.concurrent.ExecutorService dbExecutor = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "LoveAdaptation-DB");
+        t.setDaemon(true);
+        return t;
+    });
 
     public DatabaseManager(LoveAdaptation plugin) {
         this.plugin = plugin;
@@ -201,11 +208,27 @@ public class DatabaseManager {
             }
 
             return data;
-        });
+        }, dbExecutor);
     }
 
     public void savePlayerData(PlayerData data) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> savePlayerDataSync(data));
+        try {
+            dbExecutor.execute(() -> savePlayerDataSync(data));
+        } catch (java.util.concurrent.RejectedExecutionException e) {
+            savePlayerDataSync(data);
+        }
+    }
+
+    /** Drains queued saves; call from onDisable before the final synchronous save. */
+    public void shutdownExecutor() {
+        dbExecutor.shutdown();
+        try {
+            if (!dbExecutor.awaitTermination(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                plugin.getLogger().warning("Timed out waiting for pending database writes.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void savePlayerDataSync(PlayerData data) {

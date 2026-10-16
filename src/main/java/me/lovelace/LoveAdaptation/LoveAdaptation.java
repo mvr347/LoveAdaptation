@@ -73,7 +73,7 @@ public class LoveAdaptation extends JavaPlugin {
 
         // Start periodic background tasks
         adaptationTask = new AdaptationTask(this);
-        adaptationTask.runTaskTimer(this, 1L, 1L);
+        adaptationTask.runTaskTimer(this, AdaptationTask.INTERVAL_TICKS, AdaptationTask.INTERVAL_TICKS);
 
         getLogger().info("LoveAdaptation v" + getDescription().getVersion() + " has been successfully enabled!");
     }
@@ -85,6 +85,9 @@ public class LoveAdaptation extends JavaPlugin {
             adaptationTask.cancel();
         }
 
+        if (databaseManager != null) {
+            databaseManager.shutdownExecutor();
+        }
         // Save all player data synchronously before shutdown
         if (PluginManager.getInstance().getAdaptationManager() != null) {
             PluginManager.getInstance().getAdaptationManager().saveAllPlayersSync();

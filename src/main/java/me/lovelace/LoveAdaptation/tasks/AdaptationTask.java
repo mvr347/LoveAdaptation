@@ -10,7 +10,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class AdaptationTask extends BukkitRunnable {
 
     private final LoveAdaptation plugin;
+    /** Effects have ~40 tick durations and refresh-on-low-remaining, so running every tick was pure waste. */
+    public static final long INTERVAL_TICKS = 20L;
+    /** Cave glowing scans nearby entities; do it every Nth run only. */
+    private static final int GLOW_SCAN_EVERY_RUNS = 3;
     private long tickCounter = 0;
+    private int runCounter = 0;
 
     public AdaptationTask(LoveAdaptation plugin) {
         this.plugin = plugin;
@@ -18,7 +23,8 @@ public class AdaptationTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        tickCounter++;
+        tickCounter += INTERVAL_TICKS;
+        boolean glowScan = (runCounter++ % GLOW_SCAN_EVERY_RUNS) == 0;
 
         long checkSeconds = plugin.getConfig().getLong("degradation_system.check_interval_seconds", 60);
         long degradationCheckIntervalTicks = Math.max(20L, checkSeconds * 20L);
@@ -31,8 +37,8 @@ public class AdaptationTask extends BukkitRunnable {
             PlayerData data = PluginManager.getInstance().getAdaptationManager().getPlayerData(player.getUniqueId());
             if (data == null) continue;
 
-            // Apply active adaptation effects every tick
-            PluginManager.getInstance().getAdaptationManager().applyEffects(player, data);
+            // Apply active adaptation effects (refreshed only when missing/expiring)
+            PluginManager.getInstance().getAdaptationManager().applyEffects(player, data, glowScan);
 
             // Periodic degradation & reactivation check
             if (tickCounter % degradationCheckIntervalTicks == 0) {
