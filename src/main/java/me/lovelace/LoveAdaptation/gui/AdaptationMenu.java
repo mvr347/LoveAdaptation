@@ -525,13 +525,13 @@ public final class AdaptationMenu {
 
         String status;
         if (isCurrent) {
-            status = percent >= 90.0 ? "&a✓ Активна &7(&e⭐ Мастерство&7)" : "&a✓ Активна";
+            status = percent >= 90.0 ? "&a✓ Активна &8(&eМастерство&8)" : "&a✓ Активна";
         } else if (percent >= 90.0) {
-            status = "&e⭐ Мастерство";
+            status = "&eМастерство";
         } else if (percent > 0) {
-            status = "&e⏳ Прокачка";
+            status = "&eВ процессе";
         } else {
-            status = "&7🔐 Не разблокирована";
+            status = "&7Не разблокирована";
         }
 
         List<String> lore = new ArrayList<>();
@@ -540,9 +540,10 @@ public final class AdaptationMenu {
             lore.add("&7" + description);
             lore.add("");
         }
-        lore.add("&7Прогресс: &f" + String.format("%.1f%%", percent));
-        lore.add("&7Шкала: " + Utils.buildProgressBar(percent, 10));
-        lore.add("&7Статус: " + status);
+        lore.add("&8▪ &7Прогресс адаптации:");
+        lore.add("  &7Текущий уровень: &f" + String.format("%.1f%%", percent));
+        lore.add("  " + Utils.buildProgressBar(percent, 16));
+        lore.add("  &7Статус: " + status);
 
         return Utils.createCustomHead(texture, color + name, lore);
     }

@@ -195,14 +195,17 @@ public class Utils {
     public static String buildProgressBar(double percent, int length) {
         int filled = (int) Math.round((percent / 100.0) * length);
         filled = Math.max(0, Math.min(length, filled));
-        StringBuilder sb = new StringBuilder("&a");
+        String fillColor = percent >= 100.0 ? "&a" : "&6";
+        StringBuilder sb = new StringBuilder("&8[");
+        sb.append(fillColor);
         for (int i = 0; i < filled; i++) {
-            sb.append("■");
+            sb.append("█");
         }
-        sb.append("&7");
+        sb.append("&8");
         for (int i = filled; i < length; i++) {
-            sb.append("■");
+            sb.append("█");
         }
+        sb.append("&8] &8(").append(fillColor).append((int) Math.round(percent)).append("%&8)");
         return color(sb.toString());
     }
 }
