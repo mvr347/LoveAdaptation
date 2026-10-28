@@ -404,12 +404,22 @@ public class AdaptationManager {
         });
     }
 
+    private ExternalBuffs externalBuffs;
+
+    private ExternalBuffs externalBuffs() {
+        if (externalBuffs == null)
+            externalBuffs = new ExternalBuffs(plugin, (int) me.lovelace.LoveAdaptation.tasks.AdaptationTask.INTERVAL_TICKS + 10);
+        return externalBuffs;
+    }
+
     public void applyEffects(Player player, PlayerData data) {
         applyEffects(player, data, true);
     }
 
     public void applyEffects(Player player, PlayerData data, boolean scanNearbyForGlow) {
         if (player == null || data == null || !player.isOnline()) return;
+
+        externalBuffs().apply(player);
 
         boolean potionActive = data.isPotionActive();
         AdaptationType activeType = data.getCurrentAdaptation();
