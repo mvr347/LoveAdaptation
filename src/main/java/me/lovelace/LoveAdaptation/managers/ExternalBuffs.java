@@ -51,6 +51,11 @@ public final class ExternalBuffs {
         applyAttributes(player, desired, attributesByKey);
     }
 
+    /** Removes every modifier this class added; called on shutdown so no bonus outlives the plugin. */
+    public void clear(Player player) {
+        applyAttributes(player, Map.of(), Map.of());
+    }
+
     private void applyEffect(Player player, PotionEffect wanted) {
         PotionEffect current = player.getPotionEffect(wanted.getType());
         if (AdaptationRules.needsEffectRefresh(current != null,
@@ -83,7 +88,9 @@ public final class ExternalBuffs {
             if (plan.isEmpty()) continue;
             for (String key : plan.toRemove()) instance.removeModifier(presentModifiers.get(key));
             for (var add : plan.toAdd().entrySet())
-                instance.addModifier(new AttributeModifier(
+                // Transient: recomputed every tick, so it must not be saved into the player's data
+                // (a removed plugin would otherwise leave the bonus on the player for good).
+                instance.addTransientModifier(new AttributeModifier(
                         new NamespacedKey(plugin, add.getKey()), add.getValue(), AttributeModifier.Operation.ADD_NUMBER));
         }
     }

@@ -88,6 +88,9 @@ public class LoveAdaptation extends JavaPlugin {
         if (databaseManager != null) {
             databaseManager.shutdownExecutor();
         }
+        if (PluginManager.getInstance().getAdaptationManager() != null) {
+            PluginManager.getInstance().getAdaptationManager().clearExternalBuffs();
+        }
         // Save all player data synchronously before shutdown
         if (PluginManager.getInstance().getAdaptationManager() != null) {
             PluginManager.getInstance().getAdaptationManager().saveAllPlayersSync();
