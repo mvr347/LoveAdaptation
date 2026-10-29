@@ -51,7 +51,6 @@ public class BestiaryCommand implements CommandExecutor, TabCompleter {
 
         if (sub.equals("give")) {
             if (!sender.hasPermission("loveadaptation.admin")) {
-                sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
 

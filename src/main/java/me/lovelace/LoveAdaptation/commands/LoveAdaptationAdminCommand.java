@@ -48,7 +48,6 @@ public class LoveAdaptationAdminCommand implements CommandExecutor, TabCompleter
         String prefix = plugin.getConfig().getString("lang.prefix", "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> ");
 
         if (!sender.hasPermission("loveadaptation.admin")) {
-            sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
             return true;
         }
 
