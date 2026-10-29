@@ -38,7 +38,6 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
             }
             Player player = (Player) sender;
             if (!player.hasPermission("loveadaptation.use")) {
-                player.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
             // mainmenu / главменю = то же самое меню, но с кнопкой "Назад" (настраивается через
@@ -106,7 +105,6 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
         if (sub.equals("reset") || sub.equals("check") || sub.equals("givepotion") || sub.equals("reload")
                 || sub.equals("сброс") || sub.equals("проверка") || sub.equals("выдатьзелье") || sub.equals("перезагрузка")) {
             if (!sender.hasPermission("loveadaptation.admin")) {
-                sender.sendMessage(Utils.color(prefix + plugin.getConfig().getString("lang.no_permission", "&cУ вас нет прав.")));
                 return true;
             }
             sendAdminMoved(sender, "/loveadaptationadmin " + sub);

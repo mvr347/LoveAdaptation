@@ -12,15 +12,18 @@ commands:
     description: Main command for LoveAdaptation plugin
     aliases: [ la, adaptation, adaptations, адаптация ]
     permission: loveadaptation.use
+    permission-message: ""
   loveadaptationadmin:
     description: Admin command for LoveAdaptation plugin
     aliases: [ laadmin, лаадмин ]
     usage: /loveadaptationadmin <reload|reset|check|givepotion|givebestiary>
     permission: loveadaptation.admin
+    permission-message: ""
   bestiary:
     description: Hunter's Bestiary command
     aliases: [ бестиарий, hunterbestiary, fieldbestiary ]
     permission: loveadaptation.use
+    permission-message: ""
 
 permissions:
   loveadaptation.use:
