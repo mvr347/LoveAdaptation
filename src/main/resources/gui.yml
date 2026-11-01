@@ -13,11 +13,14 @@ items:
     material: "PLAYER_HEAD"
     name: "&6Профиль &8| &f%player%"
     lore:
-      - "&8▪ &7Текущие параметры:"
-      - "  &7Адаптация: %color%%name%"
-      - "  &7Прогресс: &f%progress%"
-
-  # Кнопка управления (Вк) — переключение уведомлений (слот 4 в Header)
+      - '&8Справка'
+      - ''
+      - '&8▪ &7Текущие параметры:'
+      - '  &7Адаптация: %color%%name%'
+      - '  &7Прогресс: &f%progress%'
+      - ''
+      - <gray>Адаптации растут от ваших действий.
+      - <gray>Условия и эффекты указаны в карточках.
   notifications:
     enabled: true
     slot: 4
@@ -32,9 +35,11 @@ items:
       - "&8&m─────────────────────"
       - "&aЛКМ &8— &7переключить"
 
+    texture_base64_off: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmExN2NlZDNmOTI2NjNjZGFhY2VkYThiOWFlZDY3YTNjOTQ3MTAwNGYxYTA5MTgzZWFkYjAwOTIzMWZmNzI3OSJ9fX0=
+    texture_base64_on: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM2OTZlNjYwZDMxMWFlOWQwYzQ1Nzc1ZTk3MjBkYWUzYjMxMGZlZjYzNjBmNTMzMTBjOWJjOTcwYmI3ZjI1In19fQ==
   # Кнопка информации (слот 51 в Footer, позиция "Д")
   info:
-    enabled: true
+    enabled: false
     slot: 51
     mainmenu: both
     command: ""

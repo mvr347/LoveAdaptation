@@ -28,7 +28,7 @@ adaptations:
     required_ticks: 1800000  # 25 hours in water ticks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjA3ZGJhMjZmMjliOGEzYjcxYzg1ODhjNzZkNDVmMDdkNmU3ZjQ4YjdiODA4YjUxZTJjNTk0OThhYjljMTQ0ZDYifX19"
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWQ3NWVlMDYyMDQxY2I2MWE2NzNmMGZmYzIxNWYyZDRiZTI3ZWQ0NWUwMzk2NjYzNTFiYmJhZjMzMTBlMjEyNiJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     effects_base:
       - type: "SPEED"
@@ -59,7 +59,7 @@ adaptations:
     required_ticks: 1440000  # 20 hours in Nether ticks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjEzYWZiNWJkM2NmNDNlZGRjNjQ1Y2MyNmNhMDNhM2E4MTgwZmJjNGExNGE2MTRlYmFkY2Q1NzFjYjliIn19fQ=="
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzA4NmFjYzg0MzkzNDdiNjBiMzdlNDBhMGJjZjY1YjI4ZTBiYjQwOGU0Mzc1Y2YyMjk4Nzg4NjEwNTQ4MWRmNyJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     effects_base:
       - type: "FIRE_RESISTANCE"
@@ -84,7 +84,7 @@ adaptations:
     required_ticks: 1296000  # 18 hours at Y < 32
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDEyNjQ5NDk5YjkzNzU3YTA1YmExODVkMmZjMDAxMzAwYzJiNWI2MjVhMDcyNTkxYzI0YzhlYjQ0ZmY2ODkifX19"
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzRiZTY3YWVkZWRlMzE2ZTVmMDBhN2FkM2ZiZTMwYTgxY2VmNjdkNGRmN2NlZDEzMGZiZTAyYmUwMTU0OGJjZSJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     y_threshold: 32
     effects_base:
@@ -108,7 +108,7 @@ adaptations:
     required_events: 18
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZTRkOTY2N2RkOGU5ZTY0MjYxN2RhMGFjMWJkZGY1YTk3ZDE3NzIyYzBhMzk4MGMxMjhiNDVjMTkwNzAifX19"
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjYzMGMzMTcxYzQwMjg1NDRmZjk3OWJhODdmYTAzMTAyYWFjYmMxZTkxN2FjZTk5ODRkOGVlNTFhOWJiZDViYSJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     fall_damage_reduction_base: 0.5
     fall_damage_reduction_bonus: 0.7
@@ -159,7 +159,7 @@ adaptations:
     required_damage: 9000.0
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmE2ZDM2NjBiN2QxYmMzYTgyM2E4MTJhNjYwZDRmZGMzY2M5NzkxOTNjNDNlNmI5YWIyY2I3YzgxYjdmNzEifX19"
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjEyNDY5YTVjMzE0ZTAyZjZlOWUxMzU2ZjViY2FkYzJkZGU1OTAzOGU2Y2YwOTM1YWZlZmVkNWQ3NjhiYmY1In19fQ=="
     degradation_rate_percent_per_hour: 2.0
     # Регенерация больше НЕ выдаётся за каждый полученный удар (раньше это делало её
     # фактически постоянной и слишком сильной в затяжном бою). Теперь, пока активна эта
@@ -189,7 +189,7 @@ adaptations:
     required_distance_blocks: 35000.0  # 35km = 35,000 blocks
     max_progress_percent: 90.0
     bonus_threshold_percent: 90.0
-    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU2YTJmNjMxZTUwZTg1MzAwZTFjMjA3YTBjNjJiZDUxYjc5Nzc4OGQwMDkzMTIxY2VmNmQ1ZWNlYTI5ZTNkIn19fQ=="
+    head_texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAzZmRkMjU3NjNiM2Q0NzVlMDlmOGJmNWE0MmU4NjgzZTQ4YWI3MzIzYTNjYzU0MmJiOGQ5OWFlNGI3MDNiOSJ9fX0="
     degradation_rate_percent_per_hour: 5.0
     hunger_modifier_base: 0.7
     hunger_modifier_bonus: 0.5
@@ -380,7 +380,7 @@ gui:
   mainmenu_back_command: "profile"
 
 lang:
-  prefix: "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> "
+  prefix: "<gradient:#00E5FF:#1DE9B6>Адаптации</gradient> <white>»</white> "
   only_players: "&cЭта команда доступна только игрокам."
   reloaded: "&aКонфигурация и база данных успешно перезагружены!"
   player_not_found: "&cИгрок %player% не найден."

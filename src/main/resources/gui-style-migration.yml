@@ -1,0 +1,68 @@
+# Однократное обновление оформления; исходные файлы сохраняются рядом как .pre-style-20261101.bak.
+version: 20261101
+updates:
+- file: heads.yml
+  path: notifications_on
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2FmNmMzY2FjOTRjODk0NGQwNDQxNTBjMWRkNWU0ZTZhYjUzYTAxMzgyZGFlNDYzOTE0ZmIzYmU1YTI3MzE5ZCJ9fX0="
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM2OTZlNjYwZDMxMWFlOWQwYzQ1Nzc1ZTk3MjBkYWUzYjMxMGZlZjYzNjBmNTMzMTBjOWJjOTcwYmI3ZjI1In19fQ==
+- file: heads.yml
+  path: notifications_off
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmM1MzQ1MjkwZDdlNDRkZWEzYTg5MGQ0ZDAxNDBmYzEwYTUyYTkwOTc2NzQzOGYwZjViNWQyODc3Y2JhNDg0YyJ9fX0="
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmExN2NlZDNmOTI2NjNjZGFhY2VkYThiOWFlZDY3YTNjOTQ3MTAwNGYxYTA5MTgzZWFkYjAwOTIzMWZmNzI3OSJ9fX0=
+- file: config.yml
+  path: adaptations.water.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjA3ZGJhMjZmMjliOGEzYjcxYzg1ODhjNzZkNDVmMDdkNmU3ZjQ4YjdiODA4YjUxZTJjNTk0OThhYjljMTQ0ZDYifX19"
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWQ3NWVlMDYyMDQxY2I2MWE2NzNmMGZmYzIxNWYyZDRiZTI3ZWQ0NWUwMzk2NjYzNTFiYmJhZjMzMTBlMjEyNiJ9fX0=
+- file: config.yml
+  path: adaptations.nether.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjEzYWZiNWJkM2NmNDNlZGRjNjQ1Y2MyNmNhMDNhM2E4MTgwZmJjNGExNGE2MTRlYmFkY2Q1NzFjYjliIn19fQ=="
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzA4NmFjYzg0MzkzNDdiNjBiMzdlNDBhMGJjZjY1YjI4ZTBiYjQwOGU0Mzc1Y2YyMjk4Nzg4NjEwNTQ4MWRmNyJ9fX0=
+- file: config.yml
+  path: adaptations.cave.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDEyNjQ5NDk5YjkzNzU3YTA1YmExODVkMmZjMDAxMzAwYzJiNWI2MjVhMDcyNTkxYzI0YzhlYjQ0ZmY2ODkifX19"
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzRiZTY3YWVkZWRlMzE2ZTVmMDBhN2FkM2ZiZTMwYTgxY2VmNjdkNGRmN2NlZDEzMGZiZTAyYmUwMTU0OGJjZSJ9fX0=
+- file: config.yml
+  path: adaptations.height.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZTRkOTY2N2RkOGU5ZTY0MjYxN2RhMGFjMWJkZGY1YTk3ZDE3NzIyYzBhMzk4MGMxMjhiNDVjMTkwNzAifX19"
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjYzMGMzMTcxYzQwMjg1NDRmZjk3OWJhODdmYTAzMTAyYWFjYmMxZTkxN2FjZTk5ODRkOGVlNTFhOWJiZDViYSJ9fX0=
+- file: config.yml
+  path: adaptations.combat.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmE2ZDM2NjBiN2QxYmMzYTgyM2E4MTJhNjYwZDRmZGMzY2M5NzkxOTNjNDNlNmI5YWIyY2I3YzgxYjdmNzEifX19"
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjEyNDY5YTVjMzE0ZTAyZjZlOWUxMzU2ZjViY2FkYzJkZGU1OTAzOGU2Y2YwOTM1YWZlZmVkNWQ3NjhiYmY1In19fQ==
+- file: config.yml
+  path: adaptations.travel.head_texture
+  before: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmU2YTJmNjMxZTUwZTg1MzAwZTFjMjA3YTBjNjJiZDUxYjc5Nzc4OGQwMDkzMTIxY2VmNmQ1ZWNlYTI5ZTNkIn19fQ=="
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAzZmRkMjU3NjNiM2Q0NzVlMDlmOGJmNWE0MmU4NjgzZTQ4YWI3MzIzYTNjYzU0MmJiOGQ5OWFlNGI3MDNiOSJ9fX0=
+- file: gui.yml
+  path: items.info.enabled
+  before: true
+  value: false
+- file: gui.yml
+  path: items.player_head.lore
+  before:
+  - "&8▪ &7Текущие параметры:"
+  - "  &7Адаптация: %color%%name%"
+  - "  &7Прогресс: &f%progress%"
+
+  # Кнопка управления (Вк) — переключение уведомлений (слот 4 в Header)
+  value:
+  - '&8Справка'
+  - ''
+  - '&8▪ &7Текущие параметры:'
+  - '  &7Адаптация: %color%%name%'
+  - '  &7Прогресс: &f%progress%'
+  - ''
+  - <gray>Адаптации растут от ваших действий.
+  - <gray>Условия и эффекты указаны в карточках.
+- file: config.yml
+  path: lang.prefix
+  before: "<gradient:#00E5FF:#1DE9B6><bold>Адаптации</bold></gradient> <dark_gray>»</dark_gray> "
+  value: '<gradient:#00E5FF:#1DE9B6>Адаптации</gradient> <white>»</white> '
+- file: gui.yml
+  path: items.notifications.texture_base64_on
+  before:
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM2OTZlNjYwZDMxMWFlOWQwYzQ1Nzc1ZTk3MjBkYWUzYjMxMGZlZjYzNjBmNTMzMTBjOWJjOTcwYmI3ZjI1In19fQ==
+- file: gui.yml
+  path: items.notifications.texture_base64_off
+  before:
+  value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmExN2NlZDNmOTI2NjNjZGFhY2VkYThiOWFlZDY3YTNjOTQ3MTAwNGYxYTA5MTgzZWFkYjAwOTIzMWZmNzI3OSJ9fX0=
