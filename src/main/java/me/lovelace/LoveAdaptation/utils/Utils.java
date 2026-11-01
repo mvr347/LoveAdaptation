@@ -14,9 +14,7 @@ import org.bukkit.profile.PlayerTextures;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -151,7 +149,11 @@ public class Utils {
     private static void applyTexture(SkullMeta meta, String texture) {
         texture = texture.trim();
         try {
-            PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+            PlayerProfile profile =
+                    Bukkit.createPlayerProfile(
+                            UUID.nameUUIDFromBytes(
+                                    texture.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                            "LoveTexture");
             PlayerTextures textures = profile.getTextures();
             
             String textureUrl;
