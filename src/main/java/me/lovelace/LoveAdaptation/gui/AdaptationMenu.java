@@ -90,6 +90,8 @@ public final class AdaptationMenu {
     }
 
     public void open(Player player) {
+        // A fresh normal menu forgets the Back command of an earlier mainmenu opening.
+        returnCommands.remove(player.getUniqueId());
         open(player, false);
     }
 
