@@ -99,10 +99,20 @@ public final class AdaptationMenu {
      * false - только в обычном режиме, не задано - в обоих).
      */
     public void openMainMenu(Player player) {
+        openMainMenu(player, "");
+    }
+
+    /** Command each player's Back button runs, taken from the opening command; empty means the configured one. */
+    private final java.util.Map<java.util.UUID, String> returnCommands = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** {@code returnCommand} (for example "profile") overrides the configured Back command for this player. */
+    public void openMainMenu(Player player, String returnCommand) {
         if (!isMainMenuEnabled()) {
             open(player, false);
             return;
         }
+        if (returnCommand == null || returnCommand.isBlank()) returnCommands.remove(player.getUniqueId());
+        else returnCommands.put(player.getUniqueId(), returnCommand);
         open(player, true);
     }
 
@@ -112,7 +122,11 @@ public final class AdaptationMenu {
      * работать как есть - уже развёрнутые конфиги не ломаются, никаких действий от владельца
      * сервера не требуется.
      */
-    private String resolveBackCommand() {
+    private String resolveBackCommand(Player player) {
+        String fromOpener = returnCommands.get(player.getUniqueId());
+        if (fromOpener != null && !fromOpener.isBlank()) {
+            return fromOpener;
+        }
         String configured = guiConfig.getString("items.back.command", "");
         if (configured != null && !configured.isBlank()) {
             return configured;
@@ -151,7 +165,7 @@ public final class AdaptationMenu {
         int configuredCloseSlot = guiConfig.getInt("items.close.slot", CLOSE_SLOT);
         occupied.add(configuredCloseSlot);
 
-        String backCommand = resolveBackCommand();
+        String backCommand = resolveBackCommand(player);
 
         renderNotificationsButton(inventory, holder, occupied, player, isMainMenu);
         renderInfoButton(inventory, holder, occupied, player, isMainMenu);
@@ -299,7 +313,8 @@ public final class AdaptationMenu {
                 HeadsConfig.get("back", HeadTextures.BASE_BACK_FALLBACK), name, lore);
         inventory.setItem(slot, item);
 
-        String command = guiConfig.getString("items.back.command", "");
+        String opener = returnCommands.get(viewer.getUniqueId());
+        String command = opener != null && !opener.isBlank() ? opener : guiConfig.getString("items.back.command", "");
         if (command == null || command.isBlank()) {
             command = backCommand;
         }

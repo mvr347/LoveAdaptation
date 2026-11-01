@@ -43,7 +43,10 @@ public class LoveAdaptationCommand implements CommandExecutor, TabCompleter {
             // mainmenu / главменю = то же самое меню, но с кнопкой "Назад" (настраивается через
             // gui.mainmenu_back_command в config.yml) - для открытия из общего хаб-меню сервера.
             if (args.length > 0 && (args[0].equalsIgnoreCase("mainmenu") || args[0].equalsIgnoreCase("главменю"))) {
-                plugin.getAdaptationMenu().openMainMenu(player);
+                // "/loveadaptation mainmenu profile": the second argument is the command Back runs, if it exists.
+                String back = args.length > 1 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)).strip() : "";
+                boolean usable = !back.isEmpty() && org.bukkit.Bukkit.getCommandMap().getCommand(back.split(" ", 2)[0]) != null;
+                plugin.getAdaptationMenu().openMainMenu(player, usable ? back : "");
             } else {
                 plugin.getAdaptationMenu().open(player);
             }
