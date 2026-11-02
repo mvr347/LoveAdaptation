@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Меню адаптаций: 45 слотов, фон ItemsAdder, адаптации 18–24, навигация 43/44. */
+/** Меню адаптаций: 45 слотов, фон ItemsAdder, адаптации 19–25, навигация 43/44. */
 public final class AdaptationMenu {
 
     public static final int SIZE = 45;
@@ -51,7 +51,7 @@ public final class AdaptationMenu {
     private static final Map<Integer, AdaptationType> ADAPTATION_SLOTS = new LinkedHashMap<>();
 
     static {
-        int slot = 18;
+        int slot = 19;
         for (AdaptationType type : AdaptationType.values()) {
             if (type == AdaptationType.BASE) continue;
             ADAPTATION_SLOTS.put(slot++, type);
