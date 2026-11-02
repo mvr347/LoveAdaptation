@@ -1,5 +1,9 @@
 menu:
-  title: "&6Адаптации персонажа"
+  # Фоновая картинка ItemsAdder, как в меню поведения; смещение подгоняется под ресурспак.
+  title: "<white>%img_offset_-8%%img_adaptation_menu%"
+  fallback_title: "<gold>Адаптации персонажа</gold>"
+  frame: false
+  layout-version: 2
   filler_material: "GRAY_STAINED_GLASS_PANE"
   # Включает режим mainmenu (открытие с кнопкой 'Назад' через /loveadaptation mainmenu)
   mainmenu: true
@@ -37,10 +41,10 @@ items:
 
     texture_base64_off: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmExN2NlZDNmOTI2NjNjZGFhY2VkYThiOWFlZDY3YTNjOTQ3MTAwNGYxYTA5MTgzZWFkYjAwOTIzMWZmNzI3OSJ9fX0=
     texture_base64_on: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjM2OTZlNjYwZDMxMWFlOWQwYzQ1Nzc1ZTk3MjBkYWUzYjMxMGZlZjYzNjBmNTMzMTBjOWJjOTcwYmI3ZjI1In19fQ==
-  # Кнопка информации (слот 51 в Footer, позиция "Д")
+  # Кнопка информации (слот 42 в Footer, позиция "Д")
   info:
     enabled: false
-    slot: 51
+    slot: 42
     mainmenu: both
     command: ""
     material: "PLAYER_HEAD"
@@ -50,10 +54,10 @@ items:
       - "&7Адаптации развиваются от вашей активности."
       - "&7Наберите &f90% &7для открытия бонусов мастерства."
 
-  # Кнопка "Назад" (слот 52 в Footer, позиция 7) — отображается при открытии через /adaptation mainmenu
+  # Кнопка "Назад" (слот 43 в Footer, позиция 7) — отображается при открытии через /adaptation mainmenu
   back:
     enabled: true
-    slot: 52
+    slot: 43
     mainmenu: true
     command: ""
     material: "PLAYER_HEAD"
@@ -63,10 +67,10 @@ items:
       - "&8&m─────────────────────"
       - "&aЛКМ &8— &7вернуться назад"
 
-  # Кнопка "Закрыть" (слот 53 в Footer, позиция 8)
+  # Кнопка "Закрыть" (слот 44 в Footer, позиция 8)
   close:
     enabled: true
-    slot: 53
+    slot: 44
     mainmenu: both
     command: ""
     material: "PLAYER_HEAD"

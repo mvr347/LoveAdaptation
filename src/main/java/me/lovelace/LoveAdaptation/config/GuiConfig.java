@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +43,59 @@ public final class GuiConfig {
         if (!file.exists()) {
             plugin.saveResource("gui.yml", false);
         }
-        gui = YamlConfiguration.loadConfiguration(file);
-
         try (InputStream defStream = plugin.getResource("gui.yml")) {
-            if (defStream != null) {
-                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
-                        new InputStreamReader(defStream, StandardCharsets.UTF_8));
-                gui.setDefaults(defConfig);
-            }
-        } catch (IOException e) {
-            // используем то, что уже загружено
-            plugin.getLogger().warning("Failed to load default gui.yml from plugin jar: " + e.getMessage());
+            if (defStream == null) throw new IOException("В JAR отсутствует gui.yml");
+            YamlConfiguration defaults = new YamlConfiguration();
+            defaults.load(new InputStreamReader(defStream, StandardCharsets.UTF_8));
+            gui = loadAndUpgrade(file.toPath(), defaults);
+        } catch (Exception e) {
+            throw new IllegalStateException("Не удалось загрузить gui.yml; исходный файл сохранён", e);
         }
+    }
+
+    static YamlConfiguration loadAndUpgrade(Path file, YamlConfiguration defaults) throws Exception {
+        var current = new YamlConfiguration();
+        current.load(file.toFile()); // malformed YAML must never be replaced with an empty document
+        if (upgrade(current, defaults)) {
+            Path backup = file.resolveSibling(file.getFileName() + ".pre-itemsadder-45.bak");
+            if (!Files.exists(backup)) Files.copy(file, backup);
+            Path temporary = Files.createTempFile(file.getParent(), ".gui-", ".tmp");
+            try {
+                Files.writeString(temporary, current.saveToString(), StandardCharsets.UTF_8);
+                Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } finally {
+                Files.deleteIfExists(temporary);
+            }
+        }
+        current.setDefaults(defaults);
+        return current;
+    }
+
+    static boolean upgrade(YamlConfiguration current, YamlConfiguration defaults) {
+        if (current.getInt("menu.layout-version", 0) >= 2) return false;
+        if ("&6Адаптации персонажа".equals(current.getString("menu.title")))
+            current.set("menu.title", defaults.getString("menu.title"));
+        for (String key : List.of("title", "fallback_title", "frame"))
+            if (!current.contains("menu." + key)) current.set("menu." + key, defaults.get("menu." + key));
+        for (String button : List.of("info", "back", "close")) {
+            String path = "items." + button + ".slot";
+            int old = switch (button) { case "info" -> 51; case "back" -> 52; default -> 53; };
+            if (current.getInt(path, old) == old) current.set(path, old - 9);
+        }
+        // Preserve footer-relative positions of custom controls that used the old sixth row.
+        if (current.isList("items.custom_buttons")) {
+            var buttons = new java.util.ArrayList<Map<String, Object>>();
+            for (var entry : current.getMapList("items.custom_buttons")) {
+                var copy = new java.util.LinkedHashMap<String, Object>();
+                entry.forEach((key, value) -> copy.put(key.toString(), value));
+                if (copy.get("slot") instanceof Number n && n.intValue() >= 45 && n.intValue() < 54)
+                    copy.put("slot", n.intValue() - 9);
+                buttons.add(copy);
+            }
+            current.set("items.custom_buttons", buttons);
+        }
+        current.set("menu.layout-version", 2);
+        return true;
     }
 
     public String getString(String path, String def) {

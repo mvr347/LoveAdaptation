@@ -25,48 +25,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Нативное GUI-меню адаптаций (/loveadaptation menu). Раскладка — стандарт gui_gen v2.1
- * (54 слота): слот 0 — голова игрока, footer (45-53) — Info (позиция "Д", слот 51, опциональная
- * кнопка), Back (позиция 7, слот 52, опциональная) и Close (позиция 8, слот 53, всегда). Рабочая
- * зона 19-25 (ряд 1) занята типами адаптаций (контент, не настраивается по позиции — их набор и
- * порядок берутся из {@link AdaptationType}); ряды 28-34 и 37-43 рабочей зоны свободны для
- * {@code items.custom_buttons}.
- *
- * <p>С 2026-09-23 (owner request: довести это меню до той же степени настраиваемости, что и у
- * LoveBehaivor — "снимать/добавлять базовые кнопки, двигать их, добавлять свои со своими
- * текстурами и командами") Info и Back дополнительно поддерживают {@code enabled} в gui.yml, а
- * {@code items.custom_buttons} — список полностью новых кнопок с произвольным material/texture/
- * name/lore/command, размещаемых в любом легальном по gui_gen v2.1 слоте (зона управления 2-7,
- * незанятая ячейка рабочей зоны кроме боковых стенок, footer-позиции 6/7). Close остаётся всегда
- * на слоте 53 и не конфигурируется — gui_gen v2.1 требует его присутствия без исключений.</p>
- */
+/** Меню адаптаций: 45 слотов, фон ItemsAdder, адаптации 18–24, навигация 43/44. */
 public final class AdaptationMenu {
 
-    public static final int SIZE = 54;
+    public static final int SIZE = 45;
     public static final int PLAYER_HEAD_SLOT = 0;
-    public static final int INFO_SLOT = 51;
-    public static final int BACK_SLOT = 52;
-    public static final int CLOSE_SLOT = 53;
+    public static final int INFO_SLOT = 42;
+    public static final int BACK_SLOT = 43;
+    public static final int CLOSE_SLOT = 44;
     public static final int NOTIFICATIONS_SLOT = 4;
 
     private static final String EMPTY_NAME = " ";
     private static final String FILLER_MATERIAL_DEFAULT = "GRAY_STAINED_GLASS_PANE";
 
     // Рамка Header/Footer по стандарту gui_gen v2.1: верхний ряд 1-8, Row1 9-17
-    // и нижний футер 45-52 заполняются стеклом по умолчанию. Кнопки (уведомления,
+    // и нижний футер 36-44 заполняются стеклом по умолчанию. Кнопки (уведомления,
     // инфо, назад, кастомные) заменяют стекло на своих слотах при рендере.
-    // Рабочая зона 18-44 (в т.ч. стенки) стеклом не заливается.
+    // Рабочая зона 18-35 (в т.ч. стенки) стеклом не заливается.
     private static final int[] FRAME_GLASS_SLOTS = {
         0, 1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16, 17,
-        45, 46, 47, 48, 49, 50, 51, 52, 53
+        36, 37, 38, 39, 40, 41, 42, 43, 44
     };
 
     private static final Map<Integer, AdaptationType> ADAPTATION_SLOTS = new LinkedHashMap<>();
 
     static {
-        int slot = 19;
+        int slot = 18;
         for (AdaptationType type : AdaptationType.values()) {
             if (type == AdaptationType.BASE) continue;
             ADAPTATION_SLOTS.put(slot++, type);
@@ -109,7 +94,7 @@ public final class AdaptationMenu {
 
     /** {@code returnCommand} (for example "profile") overrides the configured Back command for this player. */
     public void openMainMenu(Player player, String returnCommand) {
-        if (!isMainMenuEnabled()) {
+        if (!isMainMenuEnabled() && (returnCommand == null || returnCommand.isBlank())) {
             open(player, false);
             return;
         }
@@ -139,13 +124,16 @@ public final class AdaptationMenu {
     private void open(Player player, boolean isMainMenu) {
         AdaptationMenuHolder holder = new AdaptationMenuHolder();
         Inventory inventory = Bukkit.createInventory(holder, SIZE,
-                Utils.color(guiConfig.getString("menu.title", "&6Адаптации персонажа")));
+                me.lovelace.LoveAdaptation.integration.ItemsAdderTitles.render(
+                        player,
+                        guiConfig.getString("menu.title", "<white>%img_offset_-8%%img_adaptation_menu%"),
+                        guiConfig.getString("menu.fallback_title", "<gold>Адаптации персонажа</gold>")));
         holder.setInventory(inventory);
 
-        String fillerMaterialName = guiConfig.getString("menu.filler_material", FILLER_MATERIAL_DEFAULT);
-        ItemStack border = fillerItem(fillerMaterialName);
-        for (int slot : FRAME_GLASS_SLOTS) {
-            inventory.setItem(slot, border);
+        if (guiConfig.getBoolean("menu.frame", false)) {
+            String material = guiConfig.getString("menu.filler_material", FILLER_MATERIAL_DEFAULT);
+            ItemStack border = fillerItem(material);
+            for (int slot : FRAME_GLASS_SLOTS) inventory.setItem(slot, border.clone());
         }
 
         Set<Integer> occupied = new HashSet<>();
@@ -164,15 +152,15 @@ public final class AdaptationMenu {
         }
         occupied.addAll(ADAPTATION_SLOTS.keySet());
 
-        int configuredCloseSlot = guiConfig.getInt("items.close.slot", CLOSE_SLOT);
+        int configuredCloseSlot = CLOSE_SLOT;
         occupied.add(configuredCloseSlot);
 
         String backCommand = resolveBackCommand(player);
 
-        renderNotificationsButton(inventory, holder, occupied, player, isMainMenu);
-        renderInfoButton(inventory, holder, occupied, player, isMainMenu);
         renderBackButton(inventory, holder, occupied, backCommand, player, isMainMenu);
         renderCloseButton(inventory, holder, configuredCloseSlot, player, isMainMenu);
+        renderNotificationsButton(inventory, holder, occupied, player, isMainMenu);
+        renderInfoButton(inventory, holder, occupied, player, isMainMenu);
         renderCustomButtons(inventory, holder, occupied, player, isMainMenu);
 
         player.openInventory(inventory);
@@ -239,7 +227,7 @@ public final class AdaptationMenu {
     }
 
     /**
-     * Info - кнопка информации. По умолчанию слот 51 (footer-позиция "Д").
+     * Info - кнопка информации. По умолчанию слот 42 (footer-позиция "Д").
      * Поддерживает настраиваемый slot, mainmenu и опциональную команду command при клике.
      */
     private void renderInfoButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
@@ -282,19 +270,21 @@ public final class AdaptationMenu {
     }
 
     /**
-     * Back - кнопка Назад (по умолчанию слот 52). По умолчанию mainmenu: true.
+     * Back - кнопка Назад (по умолчанию слот 43). По умолчанию mainmenu: true.
      */
     private void renderBackButton(Inventory inventory, AdaptationMenuHolder holder, Set<Integer> occupied,
                                    String backCommand, Player viewer, boolean isMainMenu) {
+        if (backCommand == null || backCommand.isBlank()) return;
+        boolean explicitParent = isMainMenu && returnCommands.containsKey(viewer.getUniqueId());
         boolean enabled = guiConfig.getBoolean("items.back.enabled", true);
-        if (!enabled) {
+        if (!enabled && !explicitParent) {
             return;
         }
         Object mainmenu = guiConfig.get("items.back.mainmenu");
-        if (!shouldShowInMode(mainmenu, Boolean.TRUE, isMainMenu)) {
+        if (!explicitParent && !shouldShowInMode(mainmenu, Boolean.TRUE, isMainMenu)) {
             return;
         }
-        int slot = guiConfig.getInt("items.back.slot", BACK_SLOT);
+        int slot = BACK_SLOT;
         if (!isValidButtonSlot(slot)) {
             plugin.getLogger().warning("gui.yml: items.back.slot=" + slot
                     + " вне диапазона инвентаря (0-" + (SIZE - 1) + ") - кнопка Назад пропущена.");
@@ -328,18 +318,9 @@ public final class AdaptationMenu {
         }
     }
 
-    /** Close - кнопка Закрыть (по умолчанию слот 53). Поддерживает mainmenu: true/false. */
+    /** Close - кнопка Закрыть (по умолчанию слот 44). Поддерживает mainmenu: true/false. */
     private void renderCloseButton(Inventory inventory, AdaptationMenuHolder holder, int slot,
                                     Player viewer, boolean isMainMenu) {
-        boolean enabled = guiConfig.getBoolean("items.close.enabled", true);
-        if (!enabled) {
-            return;
-        }
-        Object mainmenu = guiConfig.get("items.close.mainmenu");
-        if (!shouldShowInMode(mainmenu, null, isMainMenu)) {
-            return;
-        }
-
         String texture = guiConfig.getString("items.close.texture_base64", "");
         String material = guiConfig.getString("items.close.material", "");
         String name = guiConfig.getString("items.close.name", "&cЗакрыть");
