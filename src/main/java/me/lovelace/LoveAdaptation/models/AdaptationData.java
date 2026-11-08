@@ -106,6 +106,17 @@ public class AdaptationData {
         this.deactivatedAt = deactivatedAt;
     }
 
+    /** In memory only: when the "adaptation active" notice was last shown, to keep it from repeating. */
+    private long lastActivatedNotifyAt;
+
+    public long getLastActivatedNotifyAt() {
+        return lastActivatedNotifyAt;
+    }
+
+    public void setLastActivatedNotifyAt(long lastActivatedNotifyAt) {
+        this.lastActivatedNotifyAt = lastActivatedNotifyAt;
+    }
+
     public long getLastConditionFulfilledTime() {
         return lastConditionFulfilledTime;
     }

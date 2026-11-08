@@ -215,6 +215,11 @@ degradation_system:
   reactivation_check_interval_seconds: 30
   deactivation_threshold_percent: 60.0
 
+# 2026-11-08: после того как условие текущей адаптации перестало выполняться, она остаётся активной ещё столько секунд.
+# Условия вроде TRAVEL (бег/скорость), WATER у берега и COMBAT между ударами мерцают каждые несколько тиков; раньше
+# адаптация сбрасывалась и тут же включалась снова, и каждый раз играл звук «Адаптация активна» (жалоба владельца).
+switch_grace_seconds: 8
+
 reactivation_priority:
   order:
     - NETHER
@@ -264,6 +269,8 @@ notifications:
     cooldown_seconds: 300
   adaptation_activated:
     enabled: true
+    # 2026-11-08: не чаще одного оповещения (звук + строка) на одну адаптацию за это время, даже если она переключается.
+    cooldown_seconds: 60
     actionbar: "&aАдаптация активна: &f%adaptation_name%"
     sound: "BLOCK_RESPAWN_ANCHOR_CHARGE"
     sound_volume: 0.8
