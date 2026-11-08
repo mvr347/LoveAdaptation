@@ -196,6 +196,18 @@ public class AdaptationManager {
             return;
         }
 
+        // Short grace: a condition that flickers (TRAVEL: sprint/velocity toggles every few ticks, WATER at the
+        // shoreline, COMBAT between hits) must not drop the adaptation and re-announce it a moment later - that
+        // was the endless "adaptation active" sound and actionbar.
+        if (current != AdaptationType.BASE) {
+            long graceMs = plugin.getConfig().getLong("switch_grace_seconds", 8L) * 1000L;
+            AdaptationData currentData = data.getAdaptationData(current);
+            if (currentData != null && currentData.getProgressPercent() >= 60.0
+                    && System.currentTimeMillis() - currentData.getLastConditionFulfilledTime() < graceMs) {
+                return;
+            }
+        }
+
         // If current is not valid or degraded below 60%, check priority order for reactivation
         List<String> priorityList = plugin.getConfig().getStringList("reactivation_priority.order");
         if (priorityList.isEmpty()) {
@@ -237,7 +249,12 @@ public class AdaptationManager {
             AdaptationData newData = data.getAdaptationData(newType);
             if (newData != null) newData.setActive(true);
 
-            if (data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_activated.enabled", true)) {
+            long notifyCooldownMs = plugin.getConfig().getLong("notifications.adaptation_activated.cooldown_seconds", 60L) * 1000L;
+            long nowMs = System.currentTimeMillis();
+            AdaptationData notifyData = data.getAdaptationData(newType);
+            boolean notifyDue = notifyData == null || nowMs - notifyData.getLastActivatedNotifyAt() >= notifyCooldownMs;
+            if (notifyDue && notifyData != null) notifyData.setLastActivatedNotifyAt(nowMs);
+            if (notifyDue && data.isNotificationsEnabled() && plugin.getConfig().getBoolean("notifications.adaptation_activated.enabled", true)) {
                 String name = getAdaptationDisplayName(newType);
                 String msg = plugin.getConfig().getString("notifications.adaptation_activated.actionbar", "&aАдаптация активна: &f%adaptation_name%").replace("%adaptation_name%", name);
                 String sound = plugin.getConfig().getString("notifications.adaptation_activated.sound", "BLOCK_RESPAWN_ANCHOR_CHARGE");
